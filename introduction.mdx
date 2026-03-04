@@ -5,36 +5,40 @@ description: Complete business management API for sales, purchases, inventory, a
 
 # Welcome to TechCore API
 
-TechCore API is a comprehensive .NET Core 10 Web API designed for complete business management, offering robust modules for sales operations, purchase management, inventory control, and credit management with advanced payment tracking.
+TechCore API is a .NET Core 10 Web API starter project for business management systems. The project includes a complete database schema for sales operations, purchase management, inventory control, and credit management, with the API controllers ready to be implemented.
 
 ## What is TechCore API?
 
-TechCore API provides a complete backend solution for retail and distribution businesses that need to manage:
+TechCore API provides the **database foundation** for retail and distribution businesses that need to manage:
 
-- **Sales Operations**: Create and track sales orders with support for both cash and credit transactions
-- **Purchase Management**: Record supplier purchases and maintain accurate cost tracking
-- **Inventory Control**: Real-time stock management with automatic updates and low-stock alerts
-- **Credit Management**: Advanced payment plans, installment tracking, and overdue payment monitoring
+- **Sales Operations**: Database models for sales orders with support for both cash and credit transactions
+- **Purchase Management**: Schema for supplier purchases and cost tracking
+- **Inventory Control**: Product and category models with stock management support
+- **Credit Management**: Payment plan models, installment tracking, and overdue payment views
 
-Built with modern .NET Core 10, Entity Framework Core, and SQL Server, TechCore API delivers enterprise-grade performance with a clean, RESTful architecture.
+Built with modern .NET Core 10, Entity Framework Core, and SQL Server, this project provides enterprise-grade database design with triggers, indexes, and views ready for implementation.
 
-## Key Features
+<Info>
+**Development Status**: The database schema and entity models are fully implemented. API controllers need to be created to expose the business logic through RESTful endpoints. See the [API Reference](/api-reference) for implementation guidance.
+</Info>
+
+## Database Features
 
 <CardGroup cols={2}>
-  <Card title="Sales Management" icon="cart-shopping">
-    Complete sales order processing with automatic stock deduction, tax calculation, and support for both cash and credit sales with flexible payment plans
+  <Card title="Sales Schema" icon="cart-shopping">
+    Complete data models for sales orders, sale details, payments, and payment plans with automatic balance tracking via triggers
   </Card>
   
-  <Card title="Inventory Control" icon="boxes-stacked">
-    Real-time inventory tracking with automatic stock updates, category management, minimum stock alerts, and comprehensive product cataloging
+  <Card title="Inventory Models" icon="boxes-stacked">
+    Product and category schemas with stock tracking, pricing, and automatic stock deduction triggers
   </Card>
   
   <Card title="Credit Management" icon="money-bill-trend-up">
-    Advanced payment plan generation, installment tracking, automatic balance updates, and comprehensive overdue payment monitoring with calculated penalties
+    Payment plan models, installment tracking, and database views for overdue payments with automatic balance updates
   </Card>
   
-  <Card title="Purchase Tracking" icon="truck-field">
-    Supplier purchase management with detailed order tracking, automatic inventory updates, and complete purchase history
+  <Card title="Purchase Schema" icon="truck-field">
+    Supplier and purchase order models with detailed line items and cost tracking
   </Card>
 </CardGroup>
 
@@ -58,55 +62,46 @@ Built with modern .NET Core 10, Entity Framework Core, and SQL Server, TechCore 
   </Card>
 </CardGroup>
 
-## Core Modules
+## Database Modules
 
-### Sales Module
+The database includes complete schemas for all major business operations:
 
-Manage complete sales workflows including:
-- Order creation with multiple line items
-- Customer relationship management
-- Cash and credit payment options
-- Automatic tax (IVA) calculation
-- Installment plan generation with interest rates
-- Real-time balance tracking
+### Sales Schema
 
-### Purchases Module
+Entity models for complete sales workflows:
+- **Venta**: Sales orders with tax calculation and payment tracking
+- **VentasDetalle**: Line items for each sale
+- **AbonosVenta**: Payment records with automatic balance updates
+- **PlanPago**: Payment plans with installment schedules
 
-Handle supplier relationships and procurement:
-- Purchase order management
-- Supplier information tracking
-- Automatic inventory restocking
-- Purchase history and reporting
-- Cost tracking per product
+### Purchases Schema
 
-### Inventory Module
+Models for supplier relationship management:
+- **Compra**: Purchase orders with supplier tracking
+- **ComprasDetalle**: Purchase line items with cost details
+- **Proveedore**: Supplier information and contact details
 
-Comprehensive inventory control features:
-- Product catalog with categories
-- Real-time stock levels
-- Automatic stock updates via database triggers
-- Minimum stock threshold alerts
-- Pricing management (purchase and sale prices)
-- Product status tracking
+### Inventory Schema
 
-### Credit Management Module
+Product management with stock control:
+- **Producto**: Product catalog with pricing and stock levels
+- **Categorium**: Product categories and classifications
+- **Triggers**: Automatic stock reduction on sales
 
-Advanced credit and payment features:
-- Flexible payment plan generation
-- Installment payment tracking
-- Automatic balance updates via triggers
-- Overdue payment monitoring
-- Payment history tracking
-- Interest calculation support
-- Account status views
+### Credit Management Schema
 
-## Database Features
+Advanced payment and credit tracking:
+- **PlanPago**: Installment schedules with due dates
+- **Database Views**: Pre-built views for overdue tracking
+- **Automatic Triggers**: Balance updates on payment receipt
 
-TechCore API leverages advanced SQL Server capabilities:
+### Advanced SQL Server Features
 
-- **Automated Triggers**: Automatic stock reduction on sales and balance updates on payments
-- **Optimized Indexes**: Strategic indexing on frequently queried fields for fast data retrieval
-- **Database Views**: Pre-built views for overdue payments, upcoming installments, and account statements
+The database leverages enterprise capabilities:
+
+- **Automated Triggers**: `TR_DisminuirStock` and `TR_ActualizarSaldo` for automatic updates
+- **Optimized Indexes**: Strategic indexing on frequently queried fields
+- **Database Views**: `vw_CuotasVencidas`, `vw_CuotasPorVencer`, `vw_EstadoCuenta`
 - **Foreign Key Relationships**: Fully normalized schema with referential integrity
 
 ## Get Started
@@ -116,8 +111,8 @@ TechCore API leverages advanced SQL Server capabilities:
     Get the API running in minutes with our step-by-step guide
   </Card>
   
-  <Card title="API Reference" icon="code" href="/api/sales/overview">
-    Explore all available endpoints and data models
+  <Card title="API Reference" icon="code" href="/api-reference">
+    View current endpoints and implementation guide
   </Card>
   
   <Card title="Setup Guide" icon="gear" href="/setup/installation">
@@ -128,12 +123,12 @@ TechCore API leverages advanced SQL Server capabilities:
 ## Architecture Highlights
 
 <Info>
-  TechCore API follows a clean architecture pattern with separated concerns:
-  - **Models**: Entity definitions and database context
-  - **Interfaces**: Contract definitions for services
-  - **Concretes**: Service implementations and business logic
-  - **ViewModels**: Data transfer objects for API responses
-  - **Controllers**: RESTful endpoints with standard HTTP methods
+  TechCore API is structured with a clean architecture pattern:
+  - **Models**: Entity definitions and database context (✅ Complete)
+  - **Interfaces**: Contract definitions for services (⏳ Ready for implementation)
+  - **Concretes**: Service implementations and business logic (⏳ Ready for implementation)
+  - **ViewModels**: Data transfer objects for API responses (⏳ Ready for implementation)
+  - **Controllers**: RESTful endpoints (⏳ To be implemented)
 </Info>
 
 <Note>

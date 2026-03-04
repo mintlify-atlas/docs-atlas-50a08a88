@@ -41,32 +41,8 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "Sales Management",
-            "pages": ["api/sales/overview", "api/sales/create-sale", "api/sales/get-sales", "api/sales/sale-details"]
-          },
-          {
-            "group": "Purchases Management",
-            "pages": ["api/purchases/overview", "api/purchases/create-purchase", "api/purchases/get-purchases", "api/purchases/purchase-details"]
-          },
-          {
-            "group": "Inventory Management",
-            "pages": ["api/inventory/products", "api/inventory/categories", "api/inventory/stock"]
-          },
-          {
-            "group": "Customer Management",
-            "pages": ["api/customers/overview", "api/customers/create-customer", "api/customers/get-customers", "api/customers/account-status"]
-          },
-          {
-            "group": "Supplier Management",
-            "pages": ["api/suppliers/overview", "api/suppliers/create-supplier", "api/suppliers/get-suppliers"]
-          },
-          {
-            "group": "Credit Management",
-            "pages": ["api/credit/payment-plans", "api/credit/payments", "api/credit/overdue-payments"]
-          },
-          {
-            "group": "User Management",
-            "pages": ["api/users/overview", "api/users/authentication", "api/users/roles"]
+            "group": "Endpoints",
+            "pages": ["api-reference"]
           }
         ]
       }

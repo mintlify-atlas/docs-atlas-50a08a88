@@ -121,37 +121,131 @@ Before you begin, ensure you have the following installed:
   </Step>
 </Steps>
 
-## Making Your First API Call
+## Testing the API
 
-Let's create a new product in the inventory system to verify everything is working.
+Once the API is running, you can test the available endpoints.
 
-### Create a Product Category
+<Note>
+The API currently has limited endpoints implemented. The database schema is complete, but most API controllers need to be created. See the [API Reference](/api-reference) for implementation guidance.
+</Note>
 
-First, create a category for your products:
+### Get Categories
+
+Test the categories endpoint (the only business endpoint currently implemented):
 
 ```bash
-curl -X POST "http://localhost:5000/api/Categoria" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "codigo": "ELEC001",
-    "nombre": "Electronics",
-    "descripcion": "Electronic devices and components",
-    "estado": true
-  }'
+curl -X GET "http://localhost:5000/WeatherForecast/GetCategoria"
 ```
 
 <Accordion title="Expected Response">
   ```json
-  {
-    "codCategoria": 1,
-    "codigo": "ELEC001",
-    "nombre": "Electronics",
-    "descripcion": "Electronic devices and components",
-    "estado": true,
-    "createdDate": "2026-03-04T10:30:00"
-  }
+  [
+    {
+      "codCategoria": 1,
+      "codigo": "CAT001",
+      "nombre": "Electronics",
+      "descripcion": "Electronic devices and components",
+      "estado": true,
+      "created_date": "2024-01-01T00:00:00"
+    }
+  ]
   ```
+  
+  <Info>
+  This endpoint returns categories from the database. You can add categories directly via SQL or by implementing a POST endpoint for the Categoria controller.
+  </Info>
 </Accordion>
+
+### Sample Weather Endpoint
+
+Test the sample weather forecast endpoint:
+
+```bash
+curl -X GET "http://localhost:5000/WeatherForecast"
+```
+
+<Accordion title="Expected Response">
+  ```json
+  [
+    {
+      "date": "2024-01-15",
+      "temperatureC": 10,
+      "temperatureF": 50,
+      "summary": "Cool"
+    }
+  ]
+  ```
+  
+  <Note>
+  This is a sample endpoint from the .NET template. It can be removed once you implement the business API controllers.
+  </Note>
+</Accordion>
+
+## Implementing Business Endpoints
+
+To add business functionality, create controllers for the database entities. Here's an example for products:
+
+<CodeGroup>
+```csharp ProductosController.cs
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Models.Data;
+using Models.Models;
+
+namespace TechCoreApi.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ProductosController : ControllerBase
+    {
+        private readonly TechSalesContext _context;
+
+        public ProductosController(TechSalesContext context)
+        {
+            _context = context;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetAll()
+        {
+            return await _context.Productos
+                .Include(p => p.CodCategoriaNavigation)
+                .Where(p => p.Estado == true)
+                .ToListAsync();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Producto>> GetById(string id)
+        {
+            var producto = await _context.Productos
+                .Include(p => p.CodCategoriaNavigation)
+                .FirstOrDefaultAsync(p => p.Codprod == id);
+
+            if (producto == null)
+                return NotFound();
+
+            return producto;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Producto>> Create(Producto producto)
+        {
+            _context.Productos.Add(producto);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetById), 
+                new { id = producto.Codprod }, producto);
+        }
+    }
+}
+```
+</CodeGroup>
+
+After adding this controller, restart the API and test:
+
+```bash
+curl -X GET "http://localhost:5000/api/Productos"
+```
 
 ### Create a Product
 
@@ -321,20 +415,20 @@ The API provides several views for common credit management queries:
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="API Reference" icon="book" href="/api/sales/overview">
-    Explore detailed endpoint documentation and request/response schemas
+  <Card title="API Reference" icon="book" href="/api-reference">
+    View current endpoints and controller implementation guide
   </Card>
   
-  <Card title="Authentication" icon="lock" href="/api/users/authentication">
-    Learn how to secure your API with user authentication and role-based access
+  <Card title="Data Models" icon="database" href="/architecture/data-models">
+    Explore the complete database schema and entity relationships
   </Card>
   
-  <Card title="Setup Guide" icon="cloud" href="/setup/installation">
-    Complete installation and configuration guide
+  <Card title="Architecture" icon="sitemap" href="/architecture/overview">
+    Understand the project structure and design patterns
   </Card>
   
-  <Card title="Credit Management" icon="star" href="/api/credit/payment-plans">
-    Explore credit management, payment plans, and tracking
+  <Card title="Database Setup" icon="server" href="/setup/database">
+    Complete database configuration and migration guide
   </Card>
 </CardGroup>
 

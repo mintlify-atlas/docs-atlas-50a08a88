@@ -1,0 +1,178 @@
+---
+title: API Reference
+description: Current API endpoints and implementation guide
+---
+
+# API Reference
+
+TechCore API is currently in development. The database schema and entity models are fully implemented, but most API controllers are yet to be created.
+
+## Current Endpoints
+
+The API currently has two operational endpoints:
+
+### Weather Forecast
+
+<Note>
+This is a sample endpoint from the .NET template that can be removed once actual business endpoints are implemented.
+</Note>
+
+```
+GET /WeatherForecast
+```
+
+Returns a sample weather forecast.
+
+**Response Example:**
+```json
+[
+  {
+    "date": "2024-01-15",
+    "temperatureC": 10,
+    "temperatureF": 50,
+    "summary": "Cool"
+  }
+]
+```
+
+### Get Categories
+
+```
+GET /WeatherForecast/GetCategoria
+```
+
+Returns all product categories from the database.
+
+**Response Example:**
+```json
+[
+  {
+    "codCategoria": 1,
+    "codigo": "CAT001",
+    "nombre": "Electronics",
+    "descripcion": "Electronic products",
+    "estado": true,
+    "created_date": "2024-01-01T00:00:00"
+  }
+]
+```
+
+## Database Schema
+
+The database is fully implemented with comprehensive schemas for:
+
+- **Sales Management** (Venta, VentasDetalle, AbonosVenta)
+- **Purchases Management** (Compra, ComprasDetalle)
+- **Inventory Management** (Producto, Categorium)
+- **Customer Management** (Cliente)
+- **Supplier Management** (Proveedore)
+- **Credit Management** (PlanPago, database views for overdue tracking)
+- **User Management** (User, Rol)
+
+See the [Data Models](/architecture/data-models) page for complete entity documentation.
+
+## Implementation Guide
+
+To implement API controllers for the business entities:
+
+<Steps>
+  <Step title="Create Controller">
+    Add a new controller in `TechCoreApi/Controllers/`:
+    
+    ```csharp
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Models.Data;
+    using Models.Models;
+
+    namespace TechCoreApi.Controllers
+    {
+        [ApiController]
+        [Route("api/[controller]")]
+        public class ProductosController : ControllerBase
+        {
+            private readonly TechSalesContext _context;
+
+            public ProductosController(TechSalesContext context)
+            {
+                _context = context;
+            }
+
+            [HttpGet]
+            public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
+            {
+                return await _context.Productos
+                    .Include(p => p.CodCategoriaNavigation)
+                    .Where(p => p.Estado == true)
+                    .ToListAsync();
+            }
+        }
+    }
+    ```
+  </Step>
+
+  <Step title="Add Entity-Specific Logic">
+    Implement CRUD operations following REST conventions:
+    - `GET /api/productos` - List all products
+    - `GET /api/productos/{id}` - Get single product
+    - `POST /api/productos` - Create product
+    - `PUT /api/productos/{id}` - Update product
+    - `DELETE /api/productos/{id}` - Delete product
+  </Step>
+
+  <Step title="Test with Swagger">
+    Run the API and test at `https://localhost:5001/swagger`
+  </Step>
+</Steps>
+
+## Recommended Controller Implementation Order
+
+<CardGroup cols={2}>
+  <Card title="1. Products & Categories" icon="box">
+    Start with inventory management as it has no dependencies
+  </Card>
+  
+  <Card title="2. Customers & Suppliers" icon="users">
+    Implement customer and supplier management
+  </Card>
+  
+  <Card title="3. Sales & Purchases" icon="cart-shopping">
+    Add transaction endpoints with proper stock management
+  </Card>
+  
+  <Card title="4. Credit Management" icon="credit-card">
+    Implement payment plans and tracking
+  </Card>
+</CardGroup>
+
+<Warning>
+When implementing sales and purchase endpoints, ensure you handle the database triggers properly:
+- `TR_DisminuirStock` automatically reduces stock on sales
+- `TR_ActualizarSaldo` automatically updates payment balances
+</Warning>
+
+## Authentication & Authorization
+
+The current implementation has no authentication. Before deployment, implement:
+
+1. **JWT Authentication** - Add JWT bearer tokens
+2. **Role-Based Access** - Use the `Rol` table for authorization
+3. **User Endpoints** - Create login, register, and profile management
+
+See [User Management](/architecture/data-models#user-management) for the database schema.
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Data Models" icon="database" href="/architecture/data-models">
+    Review complete entity schemas
+  </Card>
+  
+  <Card title="Project Structure" icon="folder-tree" href="/architecture/project-structure">
+    Understand the layered architecture
+  </Card>
+  
+  <Card title="Database Setup" icon="server" href="/setup/database">
+    Set up the database with migrations
+  </Card>
+</CardGroup>
