@@ -1,0 +1,244 @@
+---
+title: Payment Plans
+description: Manage payment plans and installments for credit sales
+---
+
+## Overview
+
+Payment plans allow customers to pay for sales in installments over time. Each plan consists of multiple installments (cuotas) with specific due dates and amounts.
+
+## Payment Plan Model
+
+### PlanPago
+
+Represents an individual installment in a payment plan.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `int` | Unique identifier for the installment |
+| `norden` | `string` | Sale order number (max 50 chars) |
+| `numeroCuota` | `int` | Installment number in the sequence |
+| `fechaVencimiento` | `DateOnly` | Due date for this installment |
+| `montoCuota` | `decimal(18,2)` | Amount due for this installment |
+| `pagada` | `bool?` | Payment status (default: false) |
+
+### Relationships
+
+- **norden** → References `Venta` (Sales)
+- Linked to `AbonosVenta` (Payments) by order number and installment number
+
+## Endpoints
+
+### List Payment Plans
+
+```http
+GET /api/planpagos
+```
+
+Retrieves all payment plan installments.
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `norden` | `string` | Filter by sale order number |
+| `pagada` | `bool` | Filter by payment status |
+| `fechaDesde` | `DateOnly` | Filter installments due from this date |
+| `fechaHasta` | `DateOnly` | Filter installments due until this date |
+
+**Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "norden": "VTA-2026-001",
+    "numeroCuota": 1,
+    "fechaVencimiento": "2026-04-04",
+    "montoCuota": 5000.00,
+    "pagada": false
+  },
+  {
+    "id": 2,
+    "norden": "VTA-2026-001",
+    "numeroCuota": 2,
+    "fechaVencimiento": "2026-05-04",
+    "montoCuota": 5000.00,
+    "pagada": false
+  }
+]
+```
+
+### Get Payment Plan by ID
+
+```http
+GET /api/planpagos/{id}
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | `int` | Installment ID |
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "norden": "VTA-2026-001",
+  "numeroCuota": 1,
+  "fechaVencimiento": "2026-04-04",
+  "montoCuota": 5000.00,
+  "pagada": false
+}
+```
+
+### Get Payment Plan by Sale
+
+```http
+GET /api/planpagos/orden/{norden}
+```
+
+Retrieves all installments for a specific sale.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `norden` | `string` | Sale order number |
+
+**Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "norden": "VTA-2026-001",
+    "numeroCuota": 1,
+    "fechaVencimiento": "2026-04-04",
+    "montoCuota": 5000.00,
+    "pagada": false
+  },
+  {
+    "id": 2,
+    "norden": "VTA-2026-001",
+    "numeroCuota": 2,
+    "fechaVencimiento": "2026-05-04",
+    "montoCuota": 5000.00,
+    "pagada": false
+  }
+]
+```
+
+### Create Payment Plan
+
+```http
+POST /api/planpagos
+```
+
+Creates a new payment plan installment.
+
+**Request Body:**
+
+```json
+{
+  "norden": "VTA-2026-001",
+  "numeroCuota": 1,
+  "fechaVencimiento": "2026-04-04",
+  "montoCuota": 5000.00,
+  "pagada": false
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "norden": "VTA-2026-001",
+  "numeroCuota": 1,
+  "fechaVencimiento": "2026-04-04",
+  "montoCuota": 5000.00,
+  "pagada": false
+}
+```
+
+### Update Payment Plan
+
+```http
+PUT /api/planpagos/{id}
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | `int` | Installment ID |
+
+**Request Body:**
+
+```json
+{
+  "norden": "VTA-2026-001",
+  "numeroCuota": 1,
+  "fechaVencimiento": "2026-04-04",
+  "montoCuota": 5000.00,
+  "pagada": true
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "norden": "VTA-2026-001",
+  "numeroCuota": 1,
+  "fechaVencimiento": "2026-04-04",
+  "montoCuota": 5000.00,
+  "pagada": true
+}
+```
+
+### Delete Payment Plan
+
+```http
+DELETE /api/planpagos/{id}
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | `int` | Installment ID |
+
+**Response:**
+
+```json
+{
+  "message": "Payment plan installment deleted successfully"
+}
+```
+
+## Database Indexes
+
+The `planPagos` table includes the following indexes for optimized queries:
+
+- **IDX_planPagos_norden**: Index on `norden` for fast sale-based lookups
+- **IDX_planPagos_fechaVencimiento**: Index on due dates for date range queries
+- **IDX_planPagos_pagada**: Filtered index on unpaid installments (`pagada = 0`)
+
+## Business Rules
+
+1. **Installment Sequence**: Installments are numbered sequentially (1, 2, 3, etc.)
+2. **Payment Status**: Default status is unpaid (`pagada = false`)
+3. **Due Dates**: Must be in chronological order for sequential installments
+4. **Amount Validation**: Total installment amounts should match the sale total plus interest
+5. **Foreign Key**: Must reference a valid sale order (`norden`)
+
+## Related Endpoints
+
+- [Payments](/api/credit/payments) - Process payments for installments
+- [Overdue Payments](/api/credit/overdue-payments) - Track overdue installments
+- [Sales](/api/sales/orders) - View the associated sale details

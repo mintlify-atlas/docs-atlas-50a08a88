@@ -1,0 +1,331 @@
+---
+title: 'Get Purchases'
+api: 'GET /api/purchases'
+description: 'Retrieve purchase orders with filtering and pagination'
+---
+
+## Get All Purchases
+
+```
+GET /api/purchases
+```
+
+Retrieves a list of all purchase orders in the system with optional filtering.
+
+### Query Parameters
+
+<ParamField query="codprov" type="string">
+  Filter purchases by supplier code.
+</ParamField>
+
+<ParamField query="codusu" type="integer">
+  Filter purchases by user ID who created the order.
+</ParamField>
+
+<ParamField query="estado" type="integer">
+  Filter by purchase order status (1 = active, 0 = inactive).
+</ParamField>
+
+<ParamField query="fechaInicio" type="date">
+  Filter purchases from this date onwards (inclusive).
+</ParamField>
+
+<ParamField query="fechaFin" type="date">
+  Filter purchases up to this date (inclusive).
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="pageSize" type="integer" default="20">
+  Number of records per page.
+</ParamField>
+
+<ParamField query="includeDetails" type="boolean" default="false">
+  Include purchase detail lines in the response.
+</ParamField>
+
+### Request Example
+
+<CodeGroup>
+```bash cURL - All Purchases
+curl -X GET "https://api.techcore.com/api/purchases" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```bash cURL - Filtered
+curl -X GET "https://api.techcore.com/api/purchases?codprov=PROV-001&estado=1&includeDetails=true" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```bash cURL - Date Range
+curl -X GET "https://api.techcore.com/api/purchases?fechaInicio=2026-01-01&fechaFin=2026-03-31" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</CodeGroup>
+
+### Response Example
+
+<CodeGroup>
+```json 200 OK
+{
+  "data": [
+    {
+      "norden": "PO-2026-0001",
+      "ordenN": 1,
+      "codprov": "PROV-001",
+      "codusu": 5,
+      "fecha": "2026-03-04T10:30:00",
+      "subtotal": 1500.00,
+      "iva": 285.00,
+      "total": 1785.00,
+      "estado": 1,
+      "comprasDetalles": [
+        {
+          "id": 1,
+          "norden": "PO-2026-0001",
+          "codprod": "PROD-001",
+          "cantidad": 10,
+          "precio": 100.00,
+          "subtotal": 1000.00
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "totalRecords": 1,
+    "totalPages": 1
+  }
+}
+```
+</CodeGroup>
+
+---
+
+## Get Purchase by ID
+
+```
+GET /api/purchases/{norden}
+```
+
+Retrieves a specific purchase order by its order number.
+
+### Path Parameters
+
+<ParamField path="norden" type="string" required>
+  The unique purchase order number to retrieve.
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="includeDetails" type="boolean" default="true">
+  Include purchase detail lines in the response. Defaults to true for single purchase retrieval.
+</ParamField>
+
+<ParamField query="includeSupplier" type="boolean" default="false">
+  Include supplier information in the response.
+</ParamField>
+
+<ParamField query="includeUser" type="boolean" default="false">
+  Include user information in the response.
+</ParamField>
+
+### Request Example
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.techcore.com/api/purchases/PO-2026-0001" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```bash cURL - With Related Data
+curl -X GET "https://api.techcore.com/api/purchases/PO-2026-0001?includeSupplier=true&includeUser=true" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</CodeGroup>
+
+### Response Fields
+
+<ResponseField name="norden" type="string">
+  Unique purchase order number.
+</ResponseField>
+
+<ResponseField name="ordenN" type="integer">
+  Sequential order number.
+</ResponseField>
+
+<ResponseField name="codprov" type="string">
+  Supplier code.
+</ResponseField>
+
+<ResponseField name="codusu" type="integer">
+  User ID who created the purchase.
+</ResponseField>
+
+<ResponseField name="fecha" type="datetime">
+  Purchase order date.
+</ResponseField>
+
+<ResponseField name="subtotal" type="decimal">
+  Subtotal amount before tax.
+</ResponseField>
+
+<ResponseField name="iva" type="decimal">
+  Tax amount (IVA).
+</ResponseField>
+
+<ResponseField name="total" type="decimal">
+  Total purchase amount.
+</ResponseField>
+
+<ResponseField name="estado" type="integer">
+  Purchase order status (1 = active, 0 = inactive).
+</ResponseField>
+
+<ResponseField name="codprovNavigation" type="object">
+  Supplier details (included when includeSupplier=true).
+  
+  <Expandable title="Supplier Object">
+    <ResponseField name="codprovee" type="string">
+      Supplier code.
+    </ResponseField>
+    
+    <ResponseField name="nombre" type="string">
+      Supplier name.
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      Supplier email.
+    </ResponseField>
+    
+    <ResponseField name="telefono" type="string">
+      Supplier phone.
+    </ResponseField>
+    
+    <ResponseField name="direccion" type="string">
+      Supplier address.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="codusuNavigation" type="object">
+  User details (included when includeUser=true).
+  
+  <Expandable title="User Object">
+    <ResponseField name="id" type="integer">
+      User ID.
+    </ResponseField>
+    
+    <ResponseField name="username" type="string">
+      Username.
+    </ResponseField>
+    
+    <ResponseField name="nombre" type="string">
+      Full name.
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      Email address.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="comprasDetalles" type="array">
+  Array of purchase detail lines.
+  
+  <Expandable title="Detail Line Fields">
+    <ResponseField name="id" type="integer">
+      Detail line ID.
+    </ResponseField>
+    
+    <ResponseField name="norden" type="string">
+      Purchase order number.
+    </ResponseField>
+    
+    <ResponseField name="codprod" type="string">
+      Product code.
+    </ResponseField>
+    
+    <ResponseField name="cantidad" type="integer">
+      Quantity purchased.
+    </ResponseField>
+    
+    <ResponseField name="precio" type="decimal">
+      Unit price.
+    </ResponseField>
+    
+    <ResponseField name="subtotal" type="decimal">
+      Line subtotal.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Response Example
+
+<CodeGroup>
+```json 200 OK
+{
+  "norden": "PO-2026-0001",
+  "ordenN": 1,
+  "codprov": "PROV-001",
+  "codusu": 5,
+  "fecha": "2026-03-04T10:30:00",
+  "subtotal": 1500.00,
+  "iva": 285.00,
+  "total": 1785.00,
+  "estado": 1,
+  "codprovNavigation": {
+    "codprovee": "PROV-001",
+    "nombre": "Tech Supplies Inc.",
+    "email": "sales@techsupplies.com",
+    "telefono": "555-0100",
+    "direccion": "123 Supply St, Tech City"
+  },
+  "codusuNavigation": {
+    "id": 5,
+    "username": "jdoe",
+    "nombre": "John Doe",
+    "email": "jdoe@techcore.com"
+  },
+  "comprasDetalles": [
+    {
+      "id": 1,
+      "norden": "PO-2026-0001",
+      "codprod": "PROD-001",
+      "cantidad": 10,
+      "precio": 100.00,
+      "subtotal": 1000.00
+    },
+    {
+      "id": 2,
+      "norden": "PO-2026-0001",
+      "codprod": "PROD-002",
+      "cantidad": 5,
+      "precio": 100.00,
+      "subtotal": 500.00
+    }
+  ]
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Not Found",
+  "message": "Purchase order 'PO-2026-0001' not found"
+}
+```
+</CodeGroup>
+
+## Database Indexes
+
+The following indexes are available to optimize query performance:
+
+- `IDX_compras_codprov` - Filter by supplier
+- `IDX_compras_codusu` - Filter by user
+- `IDX_compras_estado` - Filter by status
+- `IDX_compras_fecha` - Filter by date range
+
+Use these indexed fields in your queries for better performance.

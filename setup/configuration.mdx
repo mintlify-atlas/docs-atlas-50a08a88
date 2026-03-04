@@ -1,0 +1,363 @@
+---
+title: 'Configuration'
+description: 'Environment configuration, connection strings, and application settings for TechCore API'
+---
+
+## Configuration Overview
+
+TechCore API uses the standard ASP.NET Core configuration system with settings stored in `appsettings.json`. The configuration includes database connections, logging settings, and CORS policies.
+
+## appsettings.json Structure
+
+The main configuration file is located at `TechCoreApi/appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=.\\;Database=TechCore;Trusted_Connection=True;TrustServerCertificate=True;"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+## Connection Strings
+
+### Default Connection (SQL Server)
+
+The `DefaultConnection` is used by Entity Framework Core to connect to the SQL Server database.
+
+<CodeGroup>
+```json Windows Authentication
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=.\\;Database=TechCore;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}
+```
+
+```json SQL Server Authentication
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=.\\;Database=TechCore;User ID=your_username;Password=your_password;TrustServerCertificate=True;"
+  }
+}
+```
+
+```json Remote Server
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=your-server.database.windows.net;Database=TechCore;User ID=your_username;Password=your_password;TrustServerCertificate=True;"
+  }
+}
+```
+
+```json Local SQL Express
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=.\\SQLEXPRESS;Database=TechCore;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}
+```
+</CodeGroup>
+
+<Note>
+  The `TrustServerCertificate=True` setting is included to bypass SSL certificate validation. For production environments, consider using proper SSL certificates.
+</Note>
+
+### Connection String Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|----------|
+| `Data Source` | SQL Server instance name | `.\\` (local), `.\\SQLEXPRESS`, or `server-name` |
+| `Database` | Database name | `TechCore` |
+| `Trusted_Connection` | Use Windows Authentication | `True` or `False` |
+| `User ID` | SQL Server username | `sa`, `your_username` |
+| `Password` | SQL Server password | `your_password` |
+| `TrustServerCertificate` | Trust server certificate | `True` or `False` |
+
+## Database Context Configuration
+
+The database connection is configured in `Program.cs`:
+
+```csharp Program.cs
+builder.Services.AddDbContext<TechSalesContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseSqlServer(connectionString);
+});
+```
+
+<Warning>
+  Ensure the connection string name in `appsettings.json` matches the key used in `GetConnectionString()`. The default is `"DefaultConnection"`.
+</Warning>
+
+## CORS Configuration
+
+TechCore API is configured to allow cross-origin requests for API consumption from web applications.
+
+### CORS Policy Setup
+
+The CORS policy is defined in `Program.cs`:
+
+```csharp Program.cs
+var MyAllowOrigin = "MyAllorOrigins";
+builder.Services.AddCors(options => {
+    options.AddPolicy(name: MyAllowOrigin, policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+```
+
+### Applying CORS
+
+The CORS policy is applied in the middleware pipeline:
+
+```csharp Program.cs
+app.UseCors(MyAllowOrigin);
+```
+
+<Warning>
+  The current configuration allows **any origin, header, and method**. This is suitable for development but should be restricted in production environments.
+</Warning>
+
+### Production CORS Configuration
+
+For production, restrict CORS to specific origins:
+
+```csharp Recommended for Production
+builder.Services.AddCors(options => {
+    options.AddPolicy(name: MyAllowOrigin, policy =>
+    {
+        policy.WithOrigins(
+                "https://your-frontend-app.com",
+                "https://your-mobile-app.com"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+```
+
+## Logging Configuration
+
+The logging configuration controls which log levels are captured:
+
+```json appsettings.json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
+```
+
+### Log Levels
+
+<AccordionGroup>
+  <Accordion title="Trace">
+    Most detailed logs. May contain sensitive information. Not recommended for production.
+  </Accordion>
+  
+  <Accordion title="Debug">
+    Logs for debugging during development. Contains detailed information about application flow.
+  </Accordion>
+  
+  <Accordion title="Information">
+    General informational messages about application execution. Default for application logs.
+  </Accordion>
+  
+  <Accordion title="Warning">
+    Logs for unexpected events that don't stop execution. Default for ASP.NET Core framework logs.
+  </Accordion>
+  
+  <Accordion title="Error">
+    Error messages for exceptions and failures.
+  </Accordion>
+  
+  <Accordion title="Critical">
+    Critical failures requiring immediate attention.
+  </Accordion>
+</AccordionGroup>
+
+### Customizing Log Levels
+
+```json Custom Logging Configuration
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Information",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Warning"
+    }
+  }
+}
+```
+
+## Environment-Specific Configuration
+
+Create environment-specific configuration files:
+
+<Steps>
+  <Step title="Development Environment">
+    Create `appsettings.Development.json`:
+    
+    ```json appsettings.Development.json
+    {
+      "ConnectionStrings": {
+        "DefaultConnection": "Data Source=.\\;Database=TechCore_Dev;Trusted_Connection=True;TrustServerCertificate=True;"
+      },
+      "Logging": {
+        "LogLevel": {
+          "Default": "Debug",
+          "Microsoft.AspNetCore": "Information"
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Production Environment">
+    Create `appsettings.Production.json`:
+    
+    ```json appsettings.Production.json
+    {
+      "ConnectionStrings": {
+        "DefaultConnection": "Data Source=production-server;Database=TechCore;User ID=prod_user;Password=${DB_PASSWORD};TrustServerCertificate=False;"
+      },
+      "Logging": {
+        "LogLevel": {
+          "Default": "Warning",
+          "Microsoft.AspNetCore": "Warning"
+        }
+      },
+      "AllowedHosts": "your-domain.com"
+    }
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  ASP.NET Core automatically loads the environment-specific configuration file based on the `ASPNETCORE_ENVIRONMENT` variable.
+</Note>
+
+## Swagger & OpenAPI Configuration
+
+TechCore API uses both Swagger and Scalar for API documentation.
+
+### Development-Only Documentation
+
+API documentation is only enabled in development mode:
+
+```csharp Program.cs
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.MapScalarApiReference();
+}
+```
+
+### Accessing Documentation
+
+<CardGroup cols={2}>
+  <Card title="Swagger UI" icon="browser">
+    Available at `/swagger` - Interactive API documentation
+  </Card>
+  <Card title="Scalar API Reference" icon="book">
+    Available at `/scalar` - Modern API documentation viewer
+  </Card>
+</CardGroup>
+
+<Note>
+  The root URL (`/`) automatically redirects to `/swagger` for convenience during development.
+</Note>
+
+## Security Considerations
+
+<Warning>
+  **Never commit sensitive configuration to source control!**
+</Warning>
+
+### Using User Secrets (Development)
+
+For local development, store sensitive data using User Secrets:
+
+```bash
+dotnet user-secrets init
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Data Source=.\\;Database=TechCore;User ID=myuser;Password=mypassword"
+```
+
+### Using Environment Variables (Production)
+
+For production, use environment variables:
+
+```bash Linux/macOS
+export ConnectionStrings__DefaultConnection="Data Source=server;Database=TechCore;User ID=user;Password=pass"
+```
+
+```powershell Windows PowerShell
+$env:ConnectionStrings__DefaultConnection="Data Source=server;Database=TechCore;User ID=user;Password=pass"
+```
+
+<Note>
+  Use double underscores (`__`) to represent nested configuration keys in environment variables.
+</Note>
+
+## Configuration Checklist
+
+Before running the application, ensure:
+
+<Steps>
+  <Step title="Connection String">
+    ✓ Connection string points to the correct SQL Server instance
+    
+    ✓ Database name is correct (`TechCore`)
+    
+    ✓ Authentication method is configured (Windows or SQL Server)
+  </Step>
+
+  <Step title="Database">
+    ✓ SQL Server is running and accessible
+    
+    ✓ Database exists or migrations are ready to create it
+    
+    ✓ User has appropriate permissions
+  </Step>
+
+  <Step title="Environment">
+    ✓ `ASPNETCORE_ENVIRONMENT` is set correctly
+    
+    ✓ Environment-specific configuration file exists if needed
+  </Step>
+
+  <Step title="Security">
+    ✓ Sensitive data not committed to source control
+    
+    ✓ CORS policy appropriate for environment
+    
+    ✓ HTTPS configuration for production
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Database Setup" icon="database" href="/setup/database">
+    Create and configure the TechCore database
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/sales/overview">
+    Explore available API endpoints
+  </Card>
+</CardGroup>

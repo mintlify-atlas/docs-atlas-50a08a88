@@ -1,0 +1,57 @@
+---
+title: 'Supplier Management Overview'
+description: 'Manage suppliers and vendor relationships in the TechCore system'
+---
+
+## Introduction
+
+The Supplier Management API allows you to create, retrieve, and manage supplier information within the TechCore system. Suppliers are vendors who provide products through purchase orders.
+
+## Supplier Object
+
+The supplier object contains the following fields:
+
+<ResponseField name="codprovee" type="string" required>
+  Unique supplier code identifier (max 50 characters)
+</ResponseField>
+
+<ResponseField name="nombre" type="string" required>
+  Supplier name (max 200 characters)
+</ResponseField>
+
+<ResponseField name="telefono" type="string">
+  Contact phone number (max 15 characters)
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Supplier email address (max 200 characters)
+</ResponseField>
+
+<ResponseField name="direccion" type="string">
+  Physical address (max 300 characters)
+</ResponseField>
+
+<ResponseField name="estado" type="integer">
+  Supplier status (1 = active, 0 = inactive). Default: 1
+</ResponseField>
+
+<ResponseField name="createdDate" type="datetime">
+  Timestamp when the supplier was created. Auto-generated.
+</ResponseField>
+
+## Common Use Cases
+
+### Add New Supplier
+Create a new supplier record with basic contact information to enable purchase order creation.
+
+### Retrieve Supplier Details
+Fetch supplier information for purchase order processing or vendor management.
+
+### List Active Suppliers
+Get all active suppliers for dropdown selections in purchase forms.
+
+## Related Resources
+
+- [Create Supplier](/api/suppliers/create-supplier) - Add new suppliers
+- [Get Suppliers](/api/suppliers/get-suppliers) - Retrieve supplier information
+- Purchase Orders - Link suppliers to purchase transactions

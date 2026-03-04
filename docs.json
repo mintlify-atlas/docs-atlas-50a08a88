@@ -1,122 +1,75 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "TechCore API",
+  "theme": "linden",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#2563eb",
+    "light": "#3b82f6",
+    "dark": "#1e40af"
   },
-  "favicon": "/favicon.svg",
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/danielamaya503/AndroidTechSalesAPI"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/danielamaya503/AndroidTechSalesAPI"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
           },
           {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
+            "group": "Setup",
+            "pages": ["setup/installation", "setup/configuration", "setup/database"]
           },
           {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
-            ]
+            "group": "Architecture",
+            "pages": ["architecture/overview", "architecture/data-models", "architecture/project-structure"]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
+            "group": "Sales Management",
+            "pages": ["api/sales/overview", "api/sales/create-sale", "api/sales/get-sales", "api/sales/sale-details"]
           },
           {
-            "group": "Endpoint examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
+            "group": "Purchases Management",
+            "pages": ["api/purchases/overview", "api/purchases/create-purchase", "api/purchases/get-purchases", "api/purchases/purchase-details"]
+          },
+          {
+            "group": "Inventory Management",
+            "pages": ["api/inventory/products", "api/inventory/categories", "api/inventory/stock"]
+          },
+          {
+            "group": "Customer Management",
+            "pages": ["api/customers/overview", "api/customers/create-customer", "api/customers/get-customers", "api/customers/account-status"]
+          },
+          {
+            "group": "Supplier Management",
+            "pages": ["api/suppliers/overview", "api/suppliers/create-supplier", "api/suppliers/get-suppliers"]
+          },
+          {
+            "group": "Credit Management",
+            "pages": ["api/credit/payment-plans", "api/credit/payments", "api/credit/overdue-payments"]
+          },
+          {
+            "group": "User Management",
+            "pages": ["api/users/overview", "api/users/authentication", "api/users/roles"]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

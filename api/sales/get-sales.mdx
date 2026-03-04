@@ -1,0 +1,313 @@
+---
+title: 'Get Sales'
+api: 'GET /api/sales'
+description: 'Retrieve sales transactions with filtering and pagination'
+---
+
+## Query Parameters
+
+<ParamField query="norden" type="string">
+  Filter by specific order number
+</ParamField>
+
+<ParamField query="codclien" type="string">
+  Filter by customer code
+</ParamField>
+
+<ParamField query="codvend" type="integer">
+  Filter by seller/user ID
+</ParamField>
+
+<ParamField query="fechaInicio" type="date">
+  Filter sales from this date onwards (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="fechaFin" type="date">
+  Filter sales up to this date (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="tipoPago" type="string">
+  Filter by payment type: "CONTADO" or "CREDITO"
+</ParamField>
+
+<ParamField query="nula" type="boolean">
+  Filter by voided status (true for voided sales, false for active)
+</ParamField>
+
+<ParamField query="estado" type="boolean">
+  Filter by active status
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for pagination (default: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Number of results per page (default: 20, max: 100)
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  Array of sale objects
+  
+  <ResponseField name="norden" type="string">
+    Order number
+  </ResponseField>
+  
+  <ResponseField name="ordenN" type="integer">
+    Numeric order number
+  </ResponseField>
+  
+  <ResponseField name="codclien" type="string">
+    Customer code
+  </ResponseField>
+  
+  <ResponseField name="codvend" type="integer">
+    Seller ID
+  </ResponseField>
+  
+  <ResponseField name="fecha" type="datetime">
+    Sale date and time
+  </ResponseField>
+  
+  <ResponseField name="subtotal" type="decimal">
+    Subtotal before tax
+  </ResponseField>
+  
+  <ResponseField name="iva" type="decimal">
+    Tax amount
+  </ResponseField>
+  
+  <ResponseField name="total" type="decimal">
+    Total amount
+  </ResponseField>
+  
+  <ResponseField name="tipoPago" type="string">
+    Payment type (CONTADO or CREDITO)
+  </ResponseField>
+  
+  <ResponseField name="meses" type="integer">
+    Number of installment months
+  </ResponseField>
+  
+  <ResponseField name="tasaInteres" type="decimal">
+    Interest rate percentage
+  </ResponseField>
+  
+  <ResponseField name="saldo" type="decimal">
+    Outstanding balance
+  </ResponseField>
+  
+  <ResponseField name="nula" type="boolean">
+    Whether sale is voided
+  </ResponseField>
+  
+  <ResponseField name="estado" type="boolean">
+    Sale status
+  </ResponseField>
+  
+  <ResponseField name="codclienNavigation" type="object">
+    Customer details (if included)
+  </ResponseField>
+  
+  <ResponseField name="codvendNavigation" type="object">
+    Seller details (if included)
+  </ResponseField>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <ResponseField name="page" type="integer">
+    Current page number
+  </ResponseField>
+  
+  <ResponseField name="limit" type="integer">
+    Results per page
+  </ResponseField>
+  
+  <ResponseField name="total" type="integer">
+    Total number of matching sales
+  </ResponseField>
+  
+  <ResponseField name="totalPages" type="integer">
+    Total number of pages
+  </ResponseField>
+</ResponseField>
+
+## Examples
+
+### Get All Sales
+
+<CodeGroup>
+```bash curl
+curl -X GET "https://api.techcore.com/api/sales?page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "norden": "VTA-2026-001",
+      "ordenN": 1,
+      "codclien": "CLI-001",
+      "codvend": 5,
+      "fecha": "2026-03-04T10:30:00Z",
+      "subtotal": 1000.00,
+      "iva": 150.00,
+      "total": 1150.00,
+      "tipoPago": "CONTADO",
+      "meses": null,
+      "tasaInteres": 0.00,
+      "saldo": 0.00,
+      "nula": false,
+      "estado": true
+    },
+    {
+      "norden": "VTA-2026-002",
+      "ordenN": 2,
+      "codclien": "CLI-002",
+      "codvend": 5,
+      "fecha": "2026-03-04T10:35:00Z",
+      "subtotal": 5000.00,
+      "iva": 750.00,
+      "total": 5750.00,
+      "tipoPago": "CREDITO",
+      "meses": 12,
+      "tasaInteres": 2.50,
+      "saldo": 5750.00,
+      "nula": false,
+      "estado": true
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 2,
+    "totalPages": 1
+  }
+}
+```
+</CodeGroup>
+
+### Get Sale by Order Number
+
+<CodeGroup>
+```bash curl
+curl -X GET "https://api.techcore.com/api/sales/VTA-2026-001" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```json Response
+{
+  "norden": "VTA-2026-001",
+  "ordenN": 1,
+  "codclien": "CLI-001",
+  "codvend": 5,
+  "fecha": "2026-03-04T10:30:00Z",
+  "subtotal": 1000.00,
+  "iva": 150.00,
+  "total": 1150.00,
+  "tipoPago": "CONTADO",
+  "meses": null,
+  "tasaInteres": 0.00,
+  "saldo": 0.00,
+  "nula": false,
+  "estado": true,
+  "codclienNavigation": {
+    "codclien": "CLI-001",
+    "nombre": "Juan Pérez",
+    "email": "juan.perez@email.com",
+    "telefono": "809-555-0001"
+  },
+  "codvendNavigation": {
+    "id": 5,
+    "nombre": "María González",
+    "email": "maria.gonzalez@techcore.com"
+  }
+}
+```
+</CodeGroup>
+
+### Filter Sales by Customer
+
+<CodeGroup>
+```bash curl
+curl -X GET "https://api.techcore.com/api/sales?codclien=CLI-001" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "norden": "VTA-2026-001",
+      "ordenN": 1,
+      "codclien": "CLI-001",
+      "codvend": 5,
+      "fecha": "2026-03-04T10:30:00Z",
+      "subtotal": 1000.00,
+      "iva": 150.00,
+      "total": 1150.00,
+      "tipoPago": "CONTADO",
+      "meses": null,
+      "tasaInteres": 0.00,
+      "saldo": 0.00,
+      "nula": false,
+      "estado": true
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+</CodeGroup>
+
+### Filter Credit Sales by Date Range
+
+<CodeGroup>
+```bash curl
+curl -X GET "https://api.techcore.com/api/sales?tipoPago=CREDITO&fechaInicio=2026-03-01&fechaFin=2026-03-31" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "norden": "VTA-2026-002",
+      "ordenN": 2,
+      "codclien": "CLI-002",
+      "codvend": 5,
+      "fecha": "2026-03-04T10:35:00Z",
+      "subtotal": 5000.00,
+      "iva": 750.00,
+      "total": 5750.00,
+      "tipoPago": "CREDITO",
+      "meses": 12,
+      "tasaInteres": 2.50,
+      "saldo": 5750.00,
+      "nula": false,
+      "estado": true
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+</CodeGroup>
+
+## Notes
+
+- The database has indexed fields for efficient querying: `codclien`, `codvend`, `fecha`, `nula`, and `tipoPago`
+- Use the `nula=false` filter to exclude voided sales from results
+- When retrieving a single sale, related entities (customer, seller) can be included via expand parameters
+- Sales with outstanding balances (`saldo > 0`) indicate pending payments

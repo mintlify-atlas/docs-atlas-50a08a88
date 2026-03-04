@@ -1,0 +1,200 @@
+---
+title: 'Installation'
+description: 'Prerequisites and installation steps for TechCore API'
+---
+
+## Prerequisites
+
+Before installing TechCore API, ensure you have the following prerequisites installed on your system:
+
+<CardGroup cols={2}>
+  <Card title=".NET SDK" icon="code">
+    .NET 10.0 SDK or later
+  </Card>
+  <Card title="SQL Server" icon="database">
+    SQL Server 2019 or later
+  </Card>
+  <Card title="IDE" icon="laptop-code">
+    Visual Studio 2022 or VS Code
+  </Card>
+  <Card title="Package Manager" icon="box">
+    NuGet Package Manager
+  </Card>
+</CardGroup>
+
+<Warning>
+  TechCore API requires .NET 10.0. Ensure your system has the correct SDK version installed before proceeding.
+</Warning>
+
+## Verify .NET Installation
+
+Verify that .NET 10.0 SDK is installed on your system:
+
+```bash
+dotnet --version
+```
+
+The output should show version 10.0.x or later.
+
+## Installation Steps
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the TechCore API repository to your local machine:
+    
+    ```bash
+    git clone <repository-url>
+    cd TechCoreApi
+    ```
+  </Step>
+
+  <Step title="Restore Dependencies">
+    Navigate to the project directory and restore all NuGet packages:
+    
+    ```bash
+    cd TechCoreApi
+    dotnet restore
+    ```
+    
+    This will install all required packages defined in `TechSalesApi.csproj`.
+  </Step>
+
+  <Step title="Build the Project">
+    Build the project to verify all dependencies are correctly installed:
+    
+    ```bash
+    dotnet build
+    ```
+    
+    A successful build indicates all packages and dependencies are properly configured.
+  </Step>
+
+  <Step title="Configure the Database">
+    Before running the application, you must configure the database connection string. See the [Configuration](/setup/configuration) and [Database Setup](/setup/database) pages for detailed instructions.
+  </Step>
+
+  <Step title="Run the Application">
+    Once configured, run the application:
+    
+    ```bash
+    dotnet run
+    ```
+    
+    The API will start and automatically redirect to the Swagger UI at `https://localhost:<port>/swagger`.
+  </Step>
+</Steps>
+
+## Package Dependencies
+
+TechCore API uses the following NuGet packages:
+
+<AccordionGroup>
+  <Accordion title="Entity Framework Core (v10.0.3)">
+    Core packages for database operations and ORM functionality:
+    
+    - `Microsoft.EntityFrameworkCore` - Core EF functionality
+    - `Microsoft.EntityFrameworkCore.SqlServer` - SQL Server provider
+    - `Microsoft.EntityFrameworkCore.Tools` - CLI tools for migrations
+    - `Microsoft.EntityFrameworkCore.Design` - Design-time components
+  </Accordion>
+
+  <Accordion title="API Documentation (Swagger & Scalar)">
+    Tools for API documentation and testing:
+    
+    - `Swashbuckle.AspNetCore.Swagger` (v10.1.4)
+    - `Swashbuckle.AspNetCore.SwaggerGen` (v10.1.4)
+    - `Swashbuckle.AspNetCore.SwaggerUI` (v10.1.4)
+    - `Scalar.AspNetCore` (v2.12.47)
+    - `Scalar.Aspire` (v0.8.56)
+    - `Scalar.AspNetCore.Microsoft` (v2.12.47)
+    - `Scalar.AspNetCore.Swashbuckle` (v2.12.47)
+  </Accordion>
+
+  <Accordion title="ASP.NET Core OpenAPI">
+    OpenAPI specification support:
+    
+    - `Microsoft.AspNetCore.OpenApi` (v10.0.3)
+  </Accordion>
+</AccordionGroup>
+
+## Project Structure
+
+The TechCore solution contains multiple projects:
+
+```plaintext
+TechCore/
+├── TechCoreApi/           # Main Web API project
+├── Models/                # Data models and Entity Framework context
+├── ViewModels/            # DTOs and view models
+├── Interfaces/            # Service interfaces
+├── Concretes/             # Service implementations
+└── TechSalesQuery/        # Database scripts and queries
+```
+
+<Note>
+  The main API project (`TechCoreApi`) references all other projects as project dependencies. Ensure all projects are present in the solution for successful compilation.
+</Note>
+
+## Development Environment Setup
+
+<Tabs>
+  <Tab title="Visual Studio 2022">
+    1. Open `TechSalesApi.sln` in Visual Studio
+    2. Right-click the solution and select **Restore NuGet Packages**
+    3. Build the solution (Ctrl+Shift+B)
+    4. Set `TechCoreApi` as the startup project
+    5. Press F5 to run with debugging
+  </Tab>
+
+  <Tab title="VS Code">
+    1. Open the project folder in VS Code
+    2. Install the C# extension (ms-dotnettools.csharp)
+    3. Open the integrated terminal
+    4. Run `dotnet restore` and `dotnet build`
+    5. Use `dotnet run` or F5 with launch configuration
+  </Tab>
+
+  <Tab title="Command Line">
+    ```bash
+    # Navigate to the API project
+    cd TechCoreApi
+    
+    # Restore packages
+    dotnet restore
+    
+    # Build the project
+    dotnet build
+    
+    # Run the application
+    dotnet run
+    ```
+  </Tab>
+</Tabs>
+
+## Verify Installation
+
+After running the application, verify the installation by accessing:
+
+<CardGroup cols={2}>
+  <Card title="Swagger UI" icon="browser" href="https://localhost:5001/swagger">
+    Interactive API documentation and testing interface
+  </Card>
+  <Card title="Scalar API Reference" icon="book" href="https://localhost:5001/scalar">
+    Modern API documentation viewer
+  </Card>
+</CardGroup>
+
+<Note>
+  The root URL (`/`) automatically redirects to the Swagger UI for easy access during development.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/setup/configuration">
+    Configure connection strings and application settings
+  </Card>
+  <Card title="Database Setup" icon="database" href="/setup/database">
+    Set up the SQL Server database and run migrations
+  </Card>
+</CardGroup>

@@ -1,80 +1,388 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get the TechCore API up and running in minutes
 ---
 
-## Get started in three steps
+# Quickstart Guide
 
-Get your documentation site running locally and make your first customization.
+Get TechCore API running on your local machine in just a few minutes. This guide will walk you through cloning the repository, setting up the database, and making your first API call.
 
-### Step 1: Set up your local environment
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **.NET Core 10 SDK** or later
+- **SQL Server** (LocalDB, Express, or full version)
+- **Git** for cloning the repository
+- **curl** or **Postman** for testing API calls (optional)
+
+## Installation
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the TechCore API source code to your local machine:
+
+    ```bash
+    git clone <repository-url>
+    cd source/TechCoreApi
+    ```
+
+    <Note>
+      The solution includes multiple projects: TechCoreApi (main API), Models (data entities), Concretes (implementations), Interfaces (contracts), and ViewModels (DTOs).
+    </Note>
+  </Step>
+
+  <Step title="Configure Database Connection">
+    Update the connection string in `appsettings.json` to match your SQL Server configuration:
+
+    ```json appsettings.json
+    {
+      "ConnectionStrings": {
+        "DefaultConnection": "Data Source=.\\;Database=TechCore;Trusted_Connection=True;TrustServerCertificate=True;"
+      }
+    }
+    ```
+
+    <Info>
+      For SQL Server Express, use `Data Source=.\\SQLEXPRESS`. For a remote server, use `Data Source=your-server-name` and configure authentication accordingly.
+    </Info>
+
+    <Warning>
+      Make sure SQL Server is running and accepting connections before proceeding to the next step.
+    </Warning>
+  </Step>
+
+  <Step title="Restore Dependencies">
+    Restore all NuGet packages required by the project:
+
+    ```bash
+    dotnet restore
+    ```
+
+    This will download:
+    - Entity Framework Core 10.0.3
+    - SQL Server provider
+    - Swagger/OpenAPI tools
+    - Scalar API documentation
+  </Step>
+
+  <Step title="Create and Seed the Database">
+    Apply Entity Framework migrations to create the database schema:
+
+    ```bash
+    dotnet ef database update
+    ```
+
+    This command will create:
+    - **Tables**: clientes, productos, ventas, compras, categoria, proveedores, users, rol, planPagos, abonosVentas, ventasDetalle, comprasDetalle
+    - **Views**: vw_EstadoCuenta, vw_CuotasVencidas, vw_CuotasPorVencer
+    - **Triggers**: TR_ActualizarSaldo (on abonosVentas), TR_DisminuirStock (on ventasDetalle)
+    - **Indexes**: Optimized indexes on frequently queried fields
+
+    <Note>
+      If migrations don't exist yet in your environment, you may need to generate them first using:
+      ```bash
+      dotnet ef migrations add InitialCreate
+      ```
+    </Note>
+  </Step>
+
+  <Step title="Run the API">
+    Start the development server:
+
+    ```bash
+    dotnet run
+    ```
+
+    The API will start and automatically redirect the root URL (`http://localhost:5000/`) to the Swagger UI interface.
+
+    <Info>
+      By default, the API runs on:
+      - HTTP: `http://localhost:5000`
+      - HTTPS: `https://localhost:5001`
+      
+      Check the console output for the exact URLs.
+    </Info>
+  </Step>
+
+  <Step title="Explore the API">
+    Open your browser and navigate to the Swagger UI:
+
+    ```
+    http://localhost:5000/swagger
+    ```
+
+    You'll see interactive documentation for all available endpoints organized by controller.
+
+    Alternative API documentation is available via Scalar:
+    ```
+    http://localhost:5000/scalar/v1
+    ```
+  </Step>
+</Steps>
+
+## Making Your First API Call
+
+Let's create a new product in the inventory system to verify everything is working.
+
+### Create a Product Category
+
+First, create a category for your products:
+
+```bash
+curl -X POST "http://localhost:5000/api/Categoria" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "codigo": "ELEC001",
+    "nombre": "Electronics",
+    "descripcion": "Electronic devices and components",
+    "estado": true
+  }'
+```
+
+<Accordion title="Expected Response">
+  ```json
+  {
+    "codCategoria": 1,
+    "codigo": "ELEC001",
+    "nombre": "Electronics",
+    "descripcion": "Electronic devices and components",
+    "estado": true,
+    "createdDate": "2026-03-04T10:30:00"
+  }
+  ```
+</Accordion>
+
+### Create a Product
+
+Now create a product in that category:
+
+```bash
+curl -X POST "http://localhost:5000/api/Productos" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "codprod": "PROD001",
+    "codCategoria": 1,
+    "descripcion": "Wireless Mouse",
+    "precioCompra": 15.00,
+    "precioVenta": 25.00,
+    "stock": 50,
+    "stockMinimo": 10,
+    "estado": true
+  }'
+```
+
+<Accordion title="Expected Response">
+  ```json
+  {
+    "codprod": "PROD001",
+    "codCategoria": 1,
+    "descripcion": "Wireless Mouse",
+    "precioCompra": 15.00,
+    "precioVenta": 25.00,
+    "stock": 50,
+    "stockMinimo": 10,
+    "estado": true,
+    "createdDate": "2026-03-04T10:35:00"
+  }
+  ```
+</Accordion>
+
+### Retrieve Products
+
+Fetch all products to verify your product was created:
+
+```bash
+curl -X GET "http://localhost:5000/api/Productos"
+```
+
+<Accordion title="Expected Response">
+  ```json
+  [
+    {
+      "codprod": "PROD001",
+      "codCategoria": 1,
+      "descripcion": "Wireless Mouse",
+      "precioCompra": 15.00,
+      "precioVenta": 25.00,
+      "stock": 50,
+      "stockMinimo": 10,
+      "estado": true,
+      "createdDate": "2026-03-04T10:35:00"
+    }
+  ]
+  ```
+</Accordion>
+
+## Understanding the Data Model
+
+TechCore API uses a normalized relational database with the following key entities:
+
+### Core Entities
 
 <AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
+  <Accordion title="Products (productos)">
+    ```csharp
+    public partial class Producto
+    {
+        public string Codprod { get; set; }              // Product code (PK)
+        public int? CodCategoria { get; set; }           // Category ID (FK)
+        public string? Descripcion { get; set; }         // Product description
+        public decimal PrecioCompra { get; set; }        // Purchase price
+        public decimal PrecioVenta { get; set; }         // Sale price
+        public int? Stock { get; set; }                  // Current stock level
+        public int? StockMinimo { get; set; }            // Minimum stock threshold
+        public bool? Estado { get; set; }                // Active status
+        public DateTime? CreatedDate { get; set; }       // Creation timestamp
+    }
+    ```
   </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
+
+  <Accordion title="Sales (ventas)">
+    ```csharp
+    public partial class Venta
+    {
+        public string Norden { get; set; }               // Order number (PK)
+        public int OrdenN { get; set; }                  // Sequential order number
+        public string Codclien { get; set; }             // Customer code (FK)
+        public int Codvend { get; set; }                 // Salesperson ID (FK)
+        public DateTime? Fecha { get; set; }             // Sale date
+        public decimal Subtotal { get; set; }            // Subtotal amount
+        public decimal Iva { get; set; }                 // Tax amount
+        public decimal Total { get; set; }               // Total amount
+        public string? TipoPago { get; set; }            // Payment type (CONTADO/CREDITO)
+        public int? Meses { get; set; }                  // Number of months for payment plan
+        public decimal? TasaInteres { get; set; }        // Interest rate
+        public decimal Saldo { get; set; }               // Outstanding balance
+        public bool? Nula { get; set; }                  // Voided flag
+        public bool? Estado { get; set; }                // Active status
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Customers (clientes)">
+    ```csharp
+    public partial class Cliente
+    {
+        public string Codclien { get; set; }             // Customer code (PK)
+        public string Nombre { get; set; }               // Customer name
+        public string? Telefono { get; set; }            // Phone number
+        public string? Email { get; set; }               // Email address
+        public string? Direccion { get; set; }           // Physical address
+        public bool? Estado { get; set; }                // Active status
+        public DateTime? CreatedDate { get; set; }       // Creation timestamp
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Payment Plans (planPagos)">
+    ```csharp
+    public partial class PlanPago
+    {
+        public int Id { get; set; }                      // Plan ID (PK)
+        public string Norden { get; set; }               // Order number (FK)
+        public int NumeroCuota { get; set; }             // Installment number
+        public DateOnly FechaVencimiento { get; set; }   // Due date
+        public decimal MontoCuota { get; set; }          // Installment amount
+        public bool? Pagada { get; set; }                // Payment status
+    }
+    ```
   </Accordion>
 </AccordionGroup>
 
-### Step 2: Deploy your changes
+## Database Automation Features
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
+TechCore API includes powerful database triggers that automate critical business logic:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="TR_ActualizarSaldo" icon="calculator">
+    Automatically updates the outstanding balance (`saldo`) in the `ventas` table whenever a payment is recorded in `abonosVentas`.
+  </Card>
+  
+  <Card title="TR_DisminuirStock" icon="box-open">
+    Automatically reduces product stock levels in the `productos` table when sale details are inserted into `ventasDetalle`.
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Pre-built Database Views
+
+The API provides several views for common credit management queries:
+
+- **vw_EstadoCuenta**: Complete account statement showing total sales, payments, and balances by customer
+- **vw_CuotasVencidas**: Overdue installments with calculated penalties and days overdue
+- **vw_CuotasPorVencer**: Upcoming installments due within the next period
+
+## CORS Configuration
+
+<Info>
+  TechCore API is configured with CORS enabled for all origins, methods, and headers, making it ready for integration with web and mobile applications. This configuration is ideal for development but should be restricted in production environments.
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="book" href="/api/sales/overview">
+    Explore detailed endpoint documentation and request/response schemas
+  </Card>
+  
+  <Card title="Authentication" icon="lock" href="/api/users/authentication">
+    Learn how to secure your API with user authentication and role-based access
+  </Card>
+  
+  <Card title="Setup Guide" icon="cloud" href="/setup/installation">
+    Complete installation and configuration guide
+  </Card>
+  
+  <Card title="Credit Management" icon="star" href="/api/credit/payment-plans">
+    Explore credit management, payment plans, and tracking
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Database connection errors">
+    If you see connection errors:
+    
+    1. Verify SQL Server is running: `sqlcmd -S .\\SQLEXPRESS -Q "SELECT @@VERSION"`
+    2. Check your connection string in `appsettings.json`
+    3. Ensure Windows Authentication is enabled or use SQL authentication
+    4. Verify the database name matches: `TechCore`
+  </Accordion>
+
+  <Accordion title="Migration errors">
+    If `dotnet ef database update` fails:
+    
+    1. Ensure Entity Framework tools are installed:
+       ```bash
+       dotnet tool install --global dotnet-ef
+       ```
+    2. Check that the Models project is properly referenced
+    3. Verify the connection string is correct
+    4. Try dropping the database and recreating: `dotnet ef database drop` then `dotnet ef database update`
+  </Accordion>
+
+  <Accordion title="Port already in use">
+    If the default ports (5000/5001) are in use:
+    
+    1. Modify `Properties/launchSettings.json` to use different ports
+    2. Or set environment variables:
+       ```bash
+       export ASPNETCORE_URLS="http://localhost:5500"
+       dotnet run
+       ```
+  </Accordion>
+
+  <Accordion title="Swagger UI not loading">
+    If Swagger UI doesn't appear:
+    
+    1. Ensure you're running in Development mode: `export ASPNETCORE_ENVIRONMENT=Development`
+    2. Check that the root URL redirects to `/swagger`
+    3. Try accessing Swagger directly at `/swagger/index.html`
+    4. Verify Swashbuckle packages are installed
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  Remember to configure proper authentication and authorization before deploying to production. The current configuration has CORS open to all origins and no authentication middleware enabled.
+</Warning>

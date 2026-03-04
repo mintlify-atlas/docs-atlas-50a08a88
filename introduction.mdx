@@ -1,0 +1,141 @@
+---
+title: Introduction
+description: Complete business management API for sales, purchases, inventory, and credit management
+---
+
+# Welcome to TechCore API
+
+TechCore API is a comprehensive .NET Core 10 Web API designed for complete business management, offering robust modules for sales operations, purchase management, inventory control, and credit management with advanced payment tracking.
+
+## What is TechCore API?
+
+TechCore API provides a complete backend solution for retail and distribution businesses that need to manage:
+
+- **Sales Operations**: Create and track sales orders with support for both cash and credit transactions
+- **Purchase Management**: Record supplier purchases and maintain accurate cost tracking
+- **Inventory Control**: Real-time stock management with automatic updates and low-stock alerts
+- **Credit Management**: Advanced payment plans, installment tracking, and overdue payment monitoring
+
+Built with modern .NET Core 10, Entity Framework Core, and SQL Server, TechCore API delivers enterprise-grade performance with a clean, RESTful architecture.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Sales Management" icon="cart-shopping">
+    Complete sales order processing with automatic stock deduction, tax calculation, and support for both cash and credit sales with flexible payment plans
+  </Card>
+  
+  <Card title="Inventory Control" icon="boxes-stacked">
+    Real-time inventory tracking with automatic stock updates, category management, minimum stock alerts, and comprehensive product cataloging
+  </Card>
+  
+  <Card title="Credit Management" icon="money-bill-trend-up">
+    Advanced payment plan generation, installment tracking, automatic balance updates, and comprehensive overdue payment monitoring with calculated penalties
+  </Card>
+  
+  <Card title="Purchase Tracking" icon="truck-field">
+    Supplier purchase management with detailed order tracking, automatic inventory updates, and complete purchase history
+  </Card>
+</CardGroup>
+
+## Technical Stack
+
+<CardGroup cols={2}>
+  <Card title=".NET Core 10" icon="microsoft">
+    Built on the latest .NET Core framework for maximum performance and cross-platform compatibility
+  </Card>
+  
+  <Card title="Entity Framework Core" icon="database">
+    Powerful ORM with full support for SQL Server, migrations, and complex relationships
+  </Card>
+  
+  <Card title="SQL Server" icon="server">
+    Enterprise-grade database with triggers, views, and optimized indexes for high-performance queries
+  </Card>
+  
+  <Card title="OpenAPI / Swagger" icon="book-open">
+    Interactive API documentation with Swagger UI and Scalar for easy testing and integration
+  </Card>
+</CardGroup>
+
+## Core Modules
+
+### Sales Module
+
+Manage complete sales workflows including:
+- Order creation with multiple line items
+- Customer relationship management
+- Cash and credit payment options
+- Automatic tax (IVA) calculation
+- Installment plan generation with interest rates
+- Real-time balance tracking
+
+### Purchases Module
+
+Handle supplier relationships and procurement:
+- Purchase order management
+- Supplier information tracking
+- Automatic inventory restocking
+- Purchase history and reporting
+- Cost tracking per product
+
+### Inventory Module
+
+Comprehensive inventory control features:
+- Product catalog with categories
+- Real-time stock levels
+- Automatic stock updates via database triggers
+- Minimum stock threshold alerts
+- Pricing management (purchase and sale prices)
+- Product status tracking
+
+### Credit Management Module
+
+Advanced credit and payment features:
+- Flexible payment plan generation
+- Installment payment tracking
+- Automatic balance updates via triggers
+- Overdue payment monitoring
+- Payment history tracking
+- Interest calculation support
+- Account status views
+
+## Database Features
+
+TechCore API leverages advanced SQL Server capabilities:
+
+- **Automated Triggers**: Automatic stock reduction on sales and balance updates on payments
+- **Optimized Indexes**: Strategic indexing on frequently queried fields for fast data retrieval
+- **Database Views**: Pre-built views for overdue payments, upcoming installments, and account statements
+- **Foreign Key Relationships**: Fully normalized schema with referential integrity
+
+## Get Started
+
+<CardGroup cols={3}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get the API running in minutes with our step-by-step guide
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/sales/overview">
+    Explore all available endpoints and data models
+  </Card>
+  
+  <Card title="Setup Guide" icon="gear" href="/setup/installation">
+    Detailed configuration and deployment instructions
+  </Card>
+</CardGroup>
+
+## Architecture Highlights
+
+<Info>
+  TechCore API follows a clean architecture pattern with separated concerns:
+  - **Models**: Entity definitions and database context
+  - **Interfaces**: Contract definitions for services
+  - **Concretes**: Service implementations and business logic
+  - **ViewModels**: Data transfer objects for API responses
+  - **Controllers**: RESTful endpoints with standard HTTP methods
+</Info>
+
+<Note>
+  The API includes CORS support configured for cross-origin requests, making it easy to integrate with web and mobile clients. The root URL (`/`) automatically redirects to Swagger UI for immediate API exploration.
+</Note>

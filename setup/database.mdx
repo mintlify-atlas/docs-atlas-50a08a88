@@ -1,0 +1,579 @@
+---
+title: 'Database Setup'
+description: 'SQL Server database setup, schema creation, and Entity Framework migrations for TechCore API'
+---
+
+## Database Overview
+
+TechCore API uses SQL Server as its database management system with Entity Framework Core for data access. The database schema includes tables for sales, purchases, inventory, customers, suppliers, and payment plans.
+
+<Note>
+  The complete database schema is available in `TechSalesQuery/TechSalesQuery.sql` and can be executed directly in SQL Server.
+</Note>
+
+## Database Creation
+
+### Method 1: Using SQL Script (Recommended)
+
+The fastest way to set up the database is to run the provided SQL script.
+
+<Steps>
+  <Step title="Open SQL Server Management Studio">
+    Connect to your SQL Server instance using SQL Server Management Studio (SSMS) or Azure Data Studio.
+  </Step>
+
+  <Step title="Execute Database Script">
+    Open and execute the `TechSalesQuery/TechSalesQuery.sql` file:
+    
+    - File → Open → Select `TechSalesQuery.sql`
+    - Click Execute (F5) to run the entire script
+    
+    This will create:
+    - The `TechCore` database
+    - All tables with proper relationships
+    - Indexes for optimized queries
+    - Triggers for stock management and payment tracking
+    - Views for reporting
+  </Step>
+
+  <Step title="Verify Database Creation">
+    Verify that the database was created successfully:
+    
+    ```sql
+    USE TechCore;
+    GO
+    
+    SELECT TABLE_NAME 
+    FROM INFORMATION_SCHEMA.TABLES 
+    WHERE TABLE_TYPE = 'BASE TABLE'
+    ORDER BY TABLE_NAME;
+    ```
+    
+    You should see 11 tables listed.
+  </Step>
+</Steps>
+
+### Method 2: Using Entity Framework Migrations
+
+If you prefer to use EF Core migrations:
+
+<Steps>
+  <Step title="Create Initial Migration">
+    ```bash
+    cd TechCoreApi
+    dotnet ef migrations add InitialCreate
+    ```
+  </Step>
+
+  <Step title="Update Database">
+    ```bash
+    dotnet ef database update
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Using the SQL script (Method 1) ensures you get all triggers, views, and indexes. EF migrations may not include these database objects.
+</Warning>
+
+## Database Schema
+
+The TechCore database consists of the following tables:
+
+### Core Tables
+
+<AccordionGroup>
+  <Accordion title="rol - User Roles" icon="users-gear">
+    Defines user roles for access control.
+    
+    ```sql
+    CREATE TABLE rol(
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        nombreRol VARCHAR(100) NOT NULL,
+        habilitado BIT DEFAULT 1
+    )
+    ```
+    
+    **Columns:**
+    - `id`: Unique role identifier (auto-increment)
+    - `nombreRol`: Role name (e.g., Admin, Salesperson)
+    - `habilitado`: Active status (1=enabled, 0=disabled)
+  </Accordion>
+
+  <Accordion title="users - System Users" icon="user">
+    Stores user accounts and credentials.
+    
+    ```sql
+    CREATE TABLE users(
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        code VARCHAR(10) NOT NULL,
+        nombre VARCHAR(200) NOT NULL,
+        username VARCHAR(100) NOT NULL UNIQUE,
+        pwd VARCHAR(MAX) NOT NULL,
+        phone VARCHAR(15),
+        idrol INT NOT NULL,
+        email VARCHAR(200),
+        created_date DATETIME DEFAULT GETDATE(),
+        FOREIGN KEY (idrol) REFERENCES rol(id)
+    )
+    ```
+    
+    **Key Features:**
+    - Unique username constraint
+    - Foreign key relationship to `rol` table
+    - Auto-generated creation timestamp
+  </Accordion>
+
+  <Accordion title="clientes - Customers" icon="user-group">
+    Customer information and contact details.
+    
+    ```sql
+    CREATE TABLE clientes(
+        codclien VARCHAR(50) PRIMARY KEY,
+        nombre VARCHAR(200) NOT NULL,
+        telefono VARCHAR(15),
+        email VARCHAR(200),
+        direccion VARCHAR(300),
+        estado BIT DEFAULT 1,
+        created_date DATETIME DEFAULT GETDATE()
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="proveedores - Suppliers" icon="truck">
+    Supplier information for purchasing.
+    
+    ```sql
+    CREATE TABLE proveedores(
+        codprovee VARCHAR(50) PRIMARY KEY,
+        nombre VARCHAR(200) NOT NULL,
+        telefono VARCHAR(15),
+        email VARCHAR(200),
+        direccion VARCHAR(300),
+        estado INT DEFAULT 1,
+        created_date DATETIME DEFAULT GETDATE()
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="categoria - Product Categories" icon="tags">
+    Product categorization for inventory management.
+    
+    ```sql
+    CREATE TABLE categoria(
+        codCategoria INT IDENTITY(1,1) PRIMARY KEY,
+        codigo VARCHAR(20) NOT NULL UNIQUE,
+        nombre VARCHAR(150) NOT NULL,
+        descripcion VARCHAR(300),
+        estado BIT DEFAULT 1,
+        created_date DATETIME DEFAULT GETDATE()
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="productos - Products" icon="box">
+    Product inventory with pricing and stock levels.
+    
+    ```sql
+    CREATE TABLE productos(
+        codprod VARCHAR(50) PRIMARY KEY,
+        codCategoria INT NULL,
+        descripcion VARCHAR(500),
+        precioCompra DECIMAL(18,2) NOT NULL,
+        precioVenta DECIMAL(18,2) NOT NULL,
+        stock INT DEFAULT 0,
+        stockMinimo INT DEFAULT 5,
+        estado BIT DEFAULT 1,
+        created_date DATETIME DEFAULT GETDATE(),
+        FOREIGN KEY (codCategoria) REFERENCES categoria(codCategoria)
+    )
+    ```
+    
+    **Key Features:**
+    - Purchase and sale price tracking
+    - Stock level management
+    - Minimum stock threshold for reorder alerts
+  </Accordion>
+</AccordionGroup>
+
+### Transaction Tables
+
+<AccordionGroup>
+  <Accordion title="ventas - Sales Orders" icon="cash-register">
+    Sales transactions with payment terms.
+    
+    ```sql
+    CREATE TABLE ventas(
+        norden VARCHAR(50) PRIMARY KEY,
+        ordenN INT NOT NULL,
+        codclien VARCHAR(50) NOT NULL,
+        codvend INT NOT NULL,
+        fecha DATETIME DEFAULT GETDATE(),
+        subtotal DECIMAL(18,2) NOT NULL,
+        iva DECIMAL(18,2) NOT NULL,
+        total DECIMAL(18,2) NOT NULL,
+        tipoPago VARCHAR(20) DEFAULT 'CONTADO',
+        meses INT NULL,
+        tasaInteres DECIMAL(5,2) DEFAULT 0,
+        saldo DECIMAL(18,2) NOT NULL,
+        nula BIT DEFAULT 0,
+        estado BIT DEFAULT 1,
+        FOREIGN KEY (codclien) REFERENCES clientes(codclien),
+        FOREIGN KEY (codvend) REFERENCES users(id)
+    )
+    ```
+    
+    **Payment Types:**
+    - `CONTADO`: Cash payment
+    - `CREDITO`: Credit with payment plan
+  </Accordion>
+
+  <Accordion title="ventasDetalle - Sales Line Items" icon="list">
+    Individual items in each sale.
+    
+    ```sql
+    CREATE TABLE ventasDetalle(
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        norden VARCHAR(50) NOT NULL,
+        codprod VARCHAR(50) NOT NULL,
+        cantidad INT NOT NULL,
+        pventa DECIMAL(18,2) NOT NULL,
+        subtotal DECIMAL(18,2) NOT NULL,
+        FOREIGN KEY (norden) REFERENCES ventas(norden) ON DELETE CASCADE,
+        FOREIGN KEY (codprod) REFERENCES productos(codprod)
+    )
+    ```
+    
+    **Note:** Cascade delete removes all line items when a sale is deleted.
+  </Accordion>
+
+  <Accordion title="compras - Purchase Orders" icon="shopping-cart">
+    Purchases from suppliers.
+    
+    ```sql
+    CREATE TABLE compras(
+        norden VARCHAR(50) PRIMARY KEY,
+        ordenN INT NOT NULL,
+        codprov VARCHAR(50) NOT NULL,
+        codusu INT NOT NULL,
+        fecha DATETIME DEFAULT GETDATE(),
+        subtotal DECIMAL(18,2) NOT NULL,
+        iva DECIMAL(18,2) NOT NULL,
+        total DECIMAL(18,2) NOT NULL,
+        estado INT DEFAULT 1,
+        FOREIGN KEY (codprov) REFERENCES proveedores(codprovee),
+        FOREIGN KEY (codusu) REFERENCES users(id)
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="comprasDetalle - Purchase Line Items" icon="list">
+    Individual items in each purchase.
+    
+    ```sql
+    CREATE TABLE comprasDetalle(
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        norden VARCHAR(50) NOT NULL,
+        codprod VARCHAR(50) NOT NULL,
+        cantidad INT NOT NULL,
+        precio DECIMAL(18,2) NOT NULL,
+        subtotal DECIMAL(18,2) NOT NULL,
+        FOREIGN KEY (norden) REFERENCES compras(norden) ON DELETE CASCADE,
+        FOREIGN KEY (codprod) REFERENCES productos(codprod)
+    )
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Payment Management Tables
+
+<AccordionGroup>
+  <Accordion title="planPagos - Payment Plans" icon="calendar-days">
+    Installment payment schedules for credit sales.
+    
+    ```sql
+    CREATE TABLE planPagos(
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        norden VARCHAR(50) NOT NULL,
+        numeroCuota INT NOT NULL,
+        fechaVencimiento DATE NOT NULL,
+        montoCuota DECIMAL(18,2) NOT NULL,
+        pagada BIT DEFAULT 0,
+        FOREIGN KEY (norden) REFERENCES ventas(norden) ON DELETE CASCADE
+    )
+    ```
+    
+    **Features:**
+    - Tracks individual installments
+    - Due date monitoring
+    - Payment status tracking
+  </Accordion>
+
+  <Accordion title="abonosVentas - Payments Received" icon="money-bill">
+    Records payments received against credit sales.
+    
+    ```sql
+    CREATE TABLE abonosVentas(
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        norden VARCHAR(50) NOT NULL,
+        fecha DATETIME DEFAULT GETDATE(),
+        monto DECIMAL(18,2) NOT NULL,
+        numeroCuota INT NOT NULL,
+        FOREIGN KEY (norden) REFERENCES ventas(norden) ON DELETE CASCADE
+    )
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Database Triggers
+
+The database includes automated triggers for business logic:
+
+<AccordionGroup>
+  <Accordion title="TR_DisminuirStock - Automatic Stock Reduction">
+    Automatically reduces product stock when a sale is created (only for non-voided sales).
+    
+    ```sql
+    CREATE TRIGGER TR_DisminuirStock
+    ON ventasDetalle
+    AFTER INSERT
+    AS
+    BEGIN
+        UPDATE p
+        SET p.stock = p.stock - i.cantidad
+        FROM productos p
+        INNER JOIN inserted i ON p.codprod = i.codprod
+        INNER JOIN ventas v ON v.norden = i.norden
+        WHERE v.nula = 0
+    END
+    ```
+    
+    **Trigger Event:** After inserting a new sales detail record
+    
+    **Action:** Decreases product stock by the quantity sold
+  </Accordion>
+
+  <Accordion title="TR_ActualizarSaldo - Payment Processing">
+    Updates sale balance and marks installments as paid when payments are received.
+    
+    ```sql
+    CREATE TRIGGER TR_ActualizarSaldo
+    ON abonosVentas
+    AFTER INSERT
+    AS
+    BEGIN
+        UPDATE v
+        SET v.saldo = v.saldo - i.monto
+        FROM ventas v
+        INNER JOIN inserted i ON v.norden = i.norden
+    
+        UPDATE pp
+        SET pagada = 1
+        FROM planPagos pp
+        INNER JOIN inserted i 
+            ON pp.norden = i.norden 
+            AND pp.numeroCuota = i.numeroCuota
+    END
+    ```
+    
+    **Trigger Event:** After inserting a payment record
+    
+    **Actions:**
+    1. Reduces the outstanding balance on the sale
+    2. Marks the specific installment as paid
+  </Accordion>
+</AccordionGroup>
+
+## Database Views
+
+Pre-built views for common reporting needs:
+
+<AccordionGroup>
+  <Accordion title="vw_CuotasVencidas - Overdue Installments">
+    Lists all overdue payments with late fees calculated.
+    
+    ```sql
+    SELECT 
+        v.norden,
+        c.nombre AS cliente,
+        pp.numeroCuota,
+        pp.fechaVencimiento,
+        pp.montoCuota,
+        DATEDIFF(DAY, pp.fechaVencimiento, GETDATE()) AS diasAtraso,
+        (pp.montoCuota * 0.02) * DATEDIFF(DAY, pp.fechaVencimiento, GETDATE()) AS moraCalculada
+    FROM planPagos pp
+    INNER JOIN ventas v ON pp.norden = v.norden
+    INNER JOIN clientes c ON v.codclien = c.codclien
+    WHERE pp.pagada = 0
+    AND pp.fechaVencimiento < GETDATE()
+    AND v.nula = 0
+    ```
+    
+    **Late Fee Calculation:** 2% per day overdue
+  </Accordion>
+
+  <Accordion title="vw_CuotasPorVencer - Upcoming Installments">
+    Shows installments that are due but not yet overdue.
+    
+    ```sql
+    SELECT 
+        v.norden,
+        c.nombre AS cliente,
+        pp.numeroCuota,
+        pp.fechaVencimiento,
+        pp.montoCuota
+    FROM planPagos pp
+    INNER JOIN ventas v ON pp.norden = v.norden
+    INNER JOIN clientes c ON v.codclien = c.codclien
+    WHERE pp.pagada = 0
+    AND pp.fechaVencimiento >= GETDATE()
+    AND v.nula = 0
+    ```
+  </Accordion>
+
+  <Accordion title="vw_EstadoCuenta - Account Statements">
+    Provides account balance summary for credit sales.
+    
+    ```sql
+    SELECT 
+        v.norden,
+        c.nombre AS cliente,
+        v.total,
+        v.saldo,
+        v.meses,
+        SUM(ISNULL(a.monto,0)) AS totalAbonado
+    FROM ventas v
+    INNER JOIN clientes c ON v.codclien = c.codclien
+    LEFT JOIN abonosVentas a ON v.norden = a.norden
+    WHERE v.tipoPago = 'CREDITO'
+    AND v.nula = 0
+    GROUP BY v.norden, c.nombre, v.total, v.saldo, v.meses
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Database Indexes
+
+Optimized indexes are created for frequently queried columns:
+
+```sql Key Indexes
+-- Customers
+CREATE INDEX IDX_clientes_nombre ON clientes(nombre)
+CREATE INDEX IDX_clientes_estado ON clientes(estado)
+
+-- Products
+CREATE INDEX IDX_productos_descripcion ON productos(descripcion)
+CREATE INDEX IDX_productos_stock ON productos(stock, stockMinimo)
+
+-- Sales
+CREATE INDEX IDX_ventas_fecha ON ventas(fecha)
+CREATE INDEX IDX_ventas_codclien ON ventas(codclien)
+CREATE INDEX IDX_ventas_nula ON ventas(nula) WHERE nula = 0
+
+-- Payment Plans
+CREATE INDEX IDX_planPagos_fechaVencimiento ON planPagos(fechaVencimiento)
+CREATE INDEX IDX_planPagos_pagada ON planPagos(pagada) WHERE pagada = 0
+```
+
+<Note>
+  Filtered indexes on `ventas.nula` and `planPagos.pagada` improve performance for queries on active records.
+</Note>
+
+## Connection Testing
+
+Verify the database connection from the API:
+
+<Steps>
+  <Step title="Update Connection String">
+    Ensure `appsettings.json` has the correct connection string:
+    
+    ```json
+    {
+      "ConnectionStrings": {
+        "DefaultConnection": "Data Source=.\\;Database=TechCore;Trusted_Connection=True;TrustServerCertificate=True;"
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Run the Application">
+    ```bash
+    cd TechCoreApi
+    dotnet run
+    ```
+  </Step>
+
+  <Step title="Check for Errors">
+    Monitor the console output for any database connection errors. Successful startup indicates a valid connection.
+  </Step>
+</Steps>
+
+## Database Backup and Restore
+
+### Creating a Backup
+
+```sql
+BACKUP DATABASE TechCore
+TO DISK = 'C:\Backups\TechCore.bak'
+WITH FORMAT,
+     NAME = 'TechCore Full Backup';
+```
+
+### Restoring from Backup
+
+```sql
+RESTORE DATABASE TechCore
+FROM DISK = 'C:\Backups\TechCore.bak'
+WITH REPLACE;
+```
+
+<Warning>
+  Always test your backup and restore procedures regularly to ensure data recovery capability.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection Failed: Login failed for user">
+    **Solution:**
+    - Verify SQL Server authentication mode allows your authentication method
+    - Check username and password in connection string
+    - Ensure the database user has appropriate permissions
+  </Accordion>
+
+  <Accordion title="Database does not exist">
+    **Solution:**
+    - Run the `TechSalesQuery.sql` script to create the database
+    - Or use `dotnet ef database update` if using migrations
+  </Accordion>
+
+  <Accordion title="A network-related or instance-specific error occurred">
+    **Solution:**
+    - Verify SQL Server service is running
+    - Check SQL Server instance name in connection string
+    - Ensure SQL Server is configured to allow remote connections
+    - Check firewall settings
+  </Accordion>
+
+  <Accordion title="Triggers not firing">
+    **Solution:**
+    - Verify triggers were created by running:
+    ```sql
+    SELECT name, is_disabled 
+    FROM sys.triggers 
+    WHERE parent_class_desc = 'OBJECT_OR_COLUMN'
+    ```
+    - If missing, re-run the trigger creation scripts from `TechSalesQuery.sql`
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="code" href="/api/sales/overview">
+    Explore available API endpoints
+  </Card>
+  <Card title="Authentication" icon="lock" href="/api/users/authentication">
+    Set up user authentication and authorization
+  </Card>
+</CardGroup>

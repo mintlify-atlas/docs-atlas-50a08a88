@@ -1,0 +1,168 @@
+---
+title: 'Get Suppliers'
+api: 'GET /api/suppliers'
+description: 'Retrieve supplier information from the system'
+---
+
+## Get All Suppliers
+
+Retrieve a list of all suppliers in the system.
+
+### Query Parameters
+
+<ParamField query="estado" type="integer">
+  Filter by supplier status (1 = active, 0 = inactive)
+</ParamField>
+
+<ParamField query="nombre" type="string">
+  Search suppliers by name (partial match)
+</ParamField>
+
+### Response
+
+<ResponseField name="suppliers" type="array">
+  Array of supplier objects
+  <Expandable title="Supplier Object">
+    <ResponseField name="codprovee" type="string">
+      Supplier code identifier
+    </ResponseField>
+    <ResponseField name="nombre" type="string">
+      Supplier name
+    </ResponseField>
+    <ResponseField name="telefono" type="string">
+      Contact phone number
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Supplier email address
+    </ResponseField>
+    <ResponseField name="direccion" type="string">
+      Physical address
+    </ResponseField>
+    <ResponseField name="estado" type="integer">
+      Supplier status (1 = active, 0 = inactive)
+    </ResponseField>
+    <ResponseField name="createdDate" type="datetime">
+      Creation timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash Get All Suppliers
+curl -X GET 'https://api.techcore.com/api/suppliers' \
+  -H 'Authorization: Bearer YOUR_TOKEN'
+```
+
+```bash Get Active Suppliers
+curl -X GET 'https://api.techcore.com/api/suppliers?estado=1' \
+  -H 'Authorization: Bearer YOUR_TOKEN'
+```
+
+```bash Search by Name
+curl -X GET 'https://api.techcore.com/api/suppliers?nombre=Tech' \
+  -H 'Authorization: Bearer YOUR_TOKEN'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Success
+{
+  "suppliers": [
+    {
+      "codprovee": "PROV001",
+      "nombre": "Tech Solutions Inc",
+      "telefono": "809-555-0123",
+      "email": "contact@techsolutions.com",
+      "direccion": "123 Main St, Santo Domingo, DO",
+      "estado": 1,
+      "createdDate": "2026-03-04T10:30:00Z"
+    },
+    {
+      "codprovee": "PROV002",
+      "nombre": "Global Hardware Supply",
+      "telefono": "809-555-0456",
+      "email": "sales@globalhardware.com",
+      "direccion": "456 Commerce Ave, Santiago, DO",
+      "estado": 1,
+      "createdDate": "2026-03-03T14:20:00Z"
+    }
+  ]
+}
+```
+</ResponseExample>
+
+---
+
+## Get Supplier by Code
+
+Retrieve a specific supplier by their unique code.
+
+### Endpoint
+
+```
+GET /api/suppliers/{codprovee}
+```
+
+### Path Parameters
+
+<ParamField path="codprovee" type="string" required>
+  The unique supplier code identifier
+</ParamField>
+
+### Response
+
+<ResponseField name="codprovee" type="string">
+  Supplier code identifier
+</ResponseField>
+
+<ResponseField name="nombre" type="string">
+  Supplier name
+</ResponseField>
+
+<ResponseField name="telefono" type="string">
+  Contact phone number
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Supplier email address
+</ResponseField>
+
+<ResponseField name="direccion" type="string">
+  Physical address
+</ResponseField>
+
+<ResponseField name="estado" type="integer">
+  Supplier status (1 = active, 0 = inactive)
+</ResponseField>
+
+<ResponseField name="createdDate" type="datetime">
+  Creation timestamp
+</ResponseField>
+
+<RequestExample>
+```bash Get Supplier
+curl -X GET 'https://api.techcore.com/api/suppliers/PROV001' \
+  -H 'Authorization: Bearer YOUR_TOKEN'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Success
+{
+  "codprovee": "PROV001",
+  "nombre": "Tech Solutions Inc",
+  "telefono": "809-555-0123",
+  "email": "contact@techsolutions.com",
+  "direccion": "123 Main St, Santo Domingo, DO",
+  "estado": 1,
+  "createdDate": "2026-03-04T10:30:00Z"
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Supplier not found",
+  "message": "No supplier found with code PROV001"
+}
+```
+</ResponseExample>

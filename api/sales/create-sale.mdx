@@ -1,0 +1,255 @@
+---
+title: 'Create Sale'
+api: 'POST /api/sales'
+description: 'Create a new sale transaction with line items'
+---
+
+## Request Body
+
+<ParamField body="norden" type="string" required>
+  Unique order identifier (max 50 characters)
+</ParamField>
+
+<ParamField body="ordenN" type="integer" required>
+  Numeric order number for sequential tracking
+</ParamField>
+
+<ParamField body="codclien" type="string" required>
+  Customer code reference (max 50 characters)
+</ParamField>
+
+<ParamField body="codvend" type="integer" required>
+  Seller/user ID who processed the sale
+</ParamField>
+
+<ParamField body="fecha" type="datetime">
+  Sale date and time. Defaults to current timestamp if not provided
+</ParamField>
+
+<ParamField body="subtotal" type="decimal" required>
+  Subtotal before tax (18,2 precision)
+</ParamField>
+
+<ParamField body="iva" type="decimal" required>
+  Tax amount (18,2 precision)
+</ParamField>
+
+<ParamField body="total" type="decimal" required>
+  Total amount including tax (18,2 precision)
+</ParamField>
+
+<ParamField body="tipoPago" type="string">
+  Payment type: "CONTADO" (cash) or "CREDITO" (installments). Defaults to "CONTADO"
+</ParamField>
+
+<ParamField body="meses" type="integer">
+  Number of months for installment payments (required if tipoPago is "CREDITO")
+</ParamField>
+
+<ParamField body="tasaInteres" type="decimal">
+  Interest rate for installments (5,2 precision). Defaults to 0
+</ParamField>
+
+<ParamField body="saldo" type="decimal" required>
+  Outstanding balance. For cash sales this should be 0, for credit sales equals total initially
+</ParamField>
+
+<ParamField body="nula" type="boolean">
+  Whether the sale is voided. Defaults to false
+</ParamField>
+
+<ParamField body="estado" type="boolean">
+  Sale status (active/inactive). Defaults to true
+</ParamField>
+
+<ParamField body="ventasDetalles" type="array" required>
+  Array of sale line items
+  
+  <ParamField body="codprod" type="string" required>
+    Product code (max 50 characters)
+  </ParamField>
+  
+  <ParamField body="cantidad" type="integer" required>
+    Quantity sold
+  </ParamField>
+  
+  <ParamField body="pventa" type="decimal" required>
+    Unit price at time of sale (18,2 precision)
+  </ParamField>
+  
+  <ParamField body="subtotal" type="decimal" required>
+    Line item subtotal (cantidad × pventa)
+  </ParamField>
+</ParamField>
+
+## Response
+
+<ResponseField name="norden" type="string">
+  The order number of the created sale
+</ResponseField>
+
+<ResponseField name="ordenN" type="integer">
+  Numeric order number
+</ResponseField>
+
+<ResponseField name="codclien" type="string">
+  Customer code
+</ResponseField>
+
+<ResponseField name="codvend" type="integer">
+  Seller ID
+</ResponseField>
+
+<ResponseField name="fecha" type="datetime">
+  Sale timestamp
+</ResponseField>
+
+<ResponseField name="subtotal" type="decimal">
+  Subtotal before tax
+</ResponseField>
+
+<ResponseField name="iva" type="decimal">
+  Tax amount
+</ResponseField>
+
+<ResponseField name="total" type="decimal">
+  Total amount
+</ResponseField>
+
+<ResponseField name="tipoPago" type="string">
+  Payment type (CONTADO or CREDITO)
+</ResponseField>
+
+<ResponseField name="meses" type="integer">
+  Number of installment months (null for cash sales)
+</ResponseField>
+
+<ResponseField name="tasaInteres" type="decimal">
+  Interest rate percentage
+</ResponseField>
+
+<ResponseField name="saldo" type="decimal">
+  Current outstanding balance
+</ResponseField>
+
+<ResponseField name="nula" type="boolean">
+  Whether sale is voided
+</ResponseField>
+
+<ResponseField name="estado" type="boolean">
+  Sale status
+</ResponseField>
+
+## Examples
+
+### Cash Sale
+
+<CodeGroup>
+```bash curl
+curl -X POST https://api.techcore.com/api/sales \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "norden": "VTA-2026-001",
+    "ordenN": 1,
+    "codclien": "CLI-001",
+    "codvend": 5,
+    "subtotal": 1000.00,
+    "iva": 150.00,
+    "total": 1150.00,
+    "tipoPago": "CONTADO",
+    "saldo": 0.00,
+    "ventasDetalles": [
+      {
+        "codprod": "PROD-001",
+        "cantidad": 2,
+        "pventa": 400.00,
+        "subtotal": 800.00
+      },
+      {
+        "codprod": "PROD-002",
+        "cantidad": 1,
+        "pventa": 200.00,
+        "subtotal": 200.00
+      }
+    ]
+  }'
+```
+
+```json Response
+{
+  "norden": "VTA-2026-001",
+  "ordenN": 1,
+  "codclien": "CLI-001",
+  "codvend": 5,
+  "fecha": "2026-03-04T10:30:00Z",
+  "subtotal": 1000.00,
+  "iva": 150.00,
+  "total": 1150.00,
+  "tipoPago": "CONTADO",
+  "meses": null,
+  "tasaInteres": 0.00,
+  "saldo": 0.00,
+  "nula": false,
+  "estado": true
+}
+```
+</CodeGroup>
+
+### Credit Sale with Installments
+
+<CodeGroup>
+```bash curl
+curl -X POST https://api.techcore.com/api/sales \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "norden": "VTA-2026-002",
+    "ordenN": 2,
+    "codclien": "CLI-002",
+    "codvend": 5,
+    "subtotal": 5000.00,
+    "iva": 750.00,
+    "total": 5750.00,
+    "tipoPago": "CREDITO",
+    "meses": 12,
+    "tasaInteres": 2.50,
+    "saldo": 5750.00,
+    "ventasDetalles": [
+      {
+        "codprod": "PROD-003",
+        "cantidad": 1,
+        "pventa": 5000.00,
+        "subtotal": 5000.00
+      }
+    ]
+  }'
+```
+
+```json Response
+{
+  "norden": "VTA-2026-002",
+  "ordenN": 2,
+  "codclien": "CLI-002",
+  "codvend": 5,
+  "fecha": "2026-03-04T10:35:00Z",
+  "subtotal": 5000.00,
+  "iva": 750.00,
+  "total": 5750.00,
+  "tipoPago": "CREDITO",
+  "meses": 12,
+  "tasaInteres": 2.50,
+  "saldo": 5750.00,
+  "nula": false,
+  "estado": true
+}
+```
+</CodeGroup>
+
+## Notes
+
+- The `TR_DisminuirStock` trigger automatically decrements product stock when sale details are created
+- For credit sales, you should separately create payment plan entries in the `planPagos` table
+- The `norden` field serves as the primary key and must be unique
+- Customer (`codclien`) and seller (`codvend`) references must exist in their respective tables
+- All product codes in `ventasDetalles` must exist in the products table

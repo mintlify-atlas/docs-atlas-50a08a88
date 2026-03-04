@@ -1,0 +1,287 @@
+---
+title: 'Customer Account Status'
+api: 'GET /api/customers/account-status'
+description: 'View customer account balances, payment plans, and credit status'
+---
+
+## Overview
+
+The Account Status endpoints provide comprehensive views of customer financial information, including outstanding balances, payment history, and credit utilization. These endpoints leverage the `vw_EstadoCuenta` database view for optimized reporting.
+
+## Get Account Status
+
+```
+GET /api/customers/{codclien}/account-status
+```
+
+Retrieves the complete account status for a specific customer, including all sales orders with outstanding balances.
+
+### Path Parameters
+
+<ParamField path="codclien" type="string" required>
+  The unique customer code
+</ParamField>
+
+### Response
+
+<ResponseField name="codclien" type="string">
+  Customer code
+</ResponseField>
+
+<ResponseField name="nombre" type="string">
+  Customer name
+</ResponseField>
+
+<ResponseField name="orders" type="array">
+  Array of sales orders with account status information
+  
+  <Expandable title="Order object properties">
+    <ResponseField name="norden" type="string">
+      Sales order number
+    </ResponseField>
+    
+    <ResponseField name="cliente" type="string">
+      Customer name (from view)
+    </ResponseField>
+    
+    <ResponseField name="total" type="decimal">
+      Total order amount
+    </ResponseField>
+    
+    <ResponseField name="saldo" type="decimal">
+      Outstanding balance
+    </ResponseField>
+    
+    <ResponseField name="totalAbonado" type="decimal">
+      Total amount paid to date
+    </ResponseField>
+    
+    <ResponseField name="meses" type="integer">
+      Number of months in payment plan (if applicable)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="summary" type="object">
+  Summary of customer account status
+  
+  <Expandable title="Summary properties">
+    <ResponseField name="totalOrders" type="integer">
+      Total number of orders
+    </ResponseField>
+    
+    <ResponseField name="totalRevenue" type="decimal">
+      Sum of all order totals
+    </ResponseField>
+    
+    <ResponseField name="totalOutstanding" type="decimal">
+      Sum of all outstanding balances
+    </ResponseField>
+    
+    <ResponseField name="totalPaid" type="decimal">
+      Sum of all payments made
+    </ResponseField>
+    
+    <ResponseField name="paymentPercentage" type="decimal">
+      Percentage of total debt paid
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Response Example
+
+```json
+{
+  "codclien": "CUST001",
+  "nombre": "Juan Pérez García",
+  "orders": [
+    {
+      "norden": "V-2026-001",
+      "cliente": "Juan Pérez García",
+      "total": 15000.00,
+      "saldo": 5000.00,
+      "totalAbonado": 10000.00,
+      "meses": 6
+    },
+    {
+      "norden": "V-2026-045",
+      "cliente": "Juan Pérez García",
+      "total": 8500.00,
+      "saldo": 2500.00,
+      "totalAbonado": 6000.00,
+      "meses": 3
+    }
+  ],
+  "summary": {
+    "totalOrders": 2,
+    "totalRevenue": 23500.00,
+    "totalOutstanding": 7500.00,
+    "totalPaid": 16000.00,
+    "paymentPercentage": 68.09
+  }
+}
+```
+
+## Get All Account Statuses
+
+```
+GET /api/customers/account-status
+```
+
+Retrieves account status information for all customers with outstanding balances.
+
+### Query Parameters
+
+<ParamField query="minBalance" type="decimal">
+  Filter for customers with outstanding balance greater than this amount
+</ParamField>
+
+<ParamField query="orderBy" type="string" default="saldo">
+  Sort results by field. Options: `saldo`, `total`, `cliente`, `norden`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="desc">
+  Sort direction. Options: `asc`, `desc`
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of records per page
+</ParamField>
+
+### Response Example
+
+```json
+{
+  "data": [
+    {
+      "norden": "V-2026-001",
+      "cliente": "Juan Pérez García",
+      "total": 15000.00,
+      "saldo": 5000.00,
+      "totalAbonado": 10000.00,
+      "meses": 6
+    },
+    {
+      "norden": "V-2026-018",
+      "cliente": "María González",
+      "total": 12000.00,
+      "saldo": 4000.00,
+      "totalAbonado": 8000.00,
+      "meses": 4
+    },
+    {
+      "norden": "V-2026-045",
+      "cliente": "Juan Pérez García",
+      "total": 8500.00,
+      "saldo": 2500.00,
+      "totalAbonado": 6000.00,
+      "meses": 3
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "total": 3,
+    "totalPages": 1
+  },
+  "summary": {
+    "totalRevenue": 35500.00,
+    "totalOutstanding": 11500.00,
+    "totalPaid": 24000.00
+  }
+}
+```
+
+## Get Customer Credit Summary
+
+```
+GET /api/customers/{codclien}/credit-summary
+```
+
+Provides a high-level overview of a customer's credit utilization and payment behavior.
+
+### Path Parameters
+
+<ParamField path="codclien" type="string" required>
+  The unique customer code
+</ParamField>
+
+### Response Example
+
+```json
+{
+  "codclien": "CUST001",
+  "nombre": "Juan Pérez García",
+  "creditSummary": {
+    "activeOrders": 2,
+    "totalCreditExtended": 23500.00,
+    "currentBalance": 7500.00,
+    "totalPaid": 16000.00,
+    "paymentRate": 68.09,
+    "averagePaymentPlan": 4.5,
+    "oldestUnpaidOrder": "V-2026-001",
+    "creditStatus": "Good Standing"
+  },
+  "paymentHistory": {
+    "onTimePayments": 12,
+    "latePayments": 1,
+    "missedPayments": 0,
+    "averageDaysToPayment": 28
+  }
+}
+```
+
+## Account Status View Schema
+
+The `vw_EstadoCuenta` database view provides the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `norden` | string | Sales order number (max 50 characters) |
+| `cliente` | string | Customer name (max 200 characters) |
+| `total` | decimal(18,2) | Total order amount |
+| `saldo` | decimal(18,2) | Outstanding balance |
+| `totalAbonado` | decimal(38,2) | Total amount paid to date |
+| `meses` | integer | Number of months in payment plan |
+
+## Error Responses
+
+<ResponseExample>
+```json Customer Not Found
+{
+  "error": "Customer not found",
+  "code": "CUSTOMER_NOT_FOUND",
+  "details": "No customer exists with code 'CUST999'"
+}
+```
+
+```json No Account Data
+{
+  "error": "No account data available",
+  "code": "NO_DATA",
+  "details": "Customer CUST001 has no sales orders or account activity"
+}
+```
+</ResponseExample>
+
+## Notes
+
+<Info>
+  The account status views are read-only and reflect real-time data from the sales and payment tables. Changes to sales or payments are immediately reflected in these views.
+</Info>
+
+<Note>
+  The `totalAbonado` field has a higher precision (38,2) than other decimal fields to accommodate the sum of multiple payment transactions.
+</Note>
+
+<Tip>
+  Use the `minBalance` parameter to focus on customers with significant outstanding balances when generating collection reports.
+</Tip>
+
+<Warning>
+  Account status calculations include only non-voided sales (`nula = false`). Voided transactions are excluded from all balance calculations.
+</Warning>

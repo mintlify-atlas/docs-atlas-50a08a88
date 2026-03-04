@@ -1,0 +1,76 @@
+---
+title: 'Sales Management Overview'
+description: 'Sales transaction management, payment tracking, and installment plans'
+---
+
+## Overview
+
+The Sales Management module handles all sales transactions, including cash and installment sales, payment tracking, and sale line items. The module supports flexible payment options with interest rates and automated payment schedules.
+
+## Key Concepts
+
+### Sales Transactions
+
+Sales are identified by a unique order number (`norden`) and contain:
+- Customer and seller information
+- Transaction totals (subtotal, IVA, total)
+- Payment terms (cash or installments)
+- Outstanding balance tracking
+- Status flags (active/voided)
+
+### Payment Methods
+
+The system supports two primary payment types:
+
+**CONTADO (Cash)**: Immediate payment in full
+- `tipoPago`: "CONTADO"
+- No interest or installment schedule
+- Balance should be zero upon creation
+
+**CREDITO (Credit/Installments)**: Payment over time
+- `tipoPago`: "CREDITO"
+- Configurable number of months (`meses`)
+- Interest rate support (`tasaInteres`)
+- Automatic payment plan generation
+- Balance tracking with payment history
+
+### Sale Details
+
+Each sale contains one or more line items (`ventasDetalle`):
+- Product reference
+- Quantity sold
+- Unit price at time of sale
+- Line item subtotal
+
+### Payment Tracking
+
+Installment sales maintain:
+- **Payment plan** (`planPagos`): Scheduled installments with due dates
+- **Payment history** (`abonosVentas`): Actual payments received
+- **Balance** (`saldo`): Automatically updated via database triggers
+
+## Data Model Relationships
+
+```
+Venta (Sale)
+├── Cliente (Customer) [codclien]
+├── User (Seller) [codvend]
+├── VentasDetalle[] (Line Items)
+├── AbonosVenta[] (Payments)
+└── PlanPago[] (Payment Schedule)
+```
+
+## Common Operations
+
+- [Create a sale](/api/sales/create-sale) - Process new sales transactions
+- [Retrieve sales](/api/sales/get-sales) - Query sales by various criteria
+- [Manage sale details](/api/sales/sale-details) - Work with line items and payments
+
+## Business Rules
+
+- Sales can be voided using the `nula` flag
+- Stock is automatically decremented when sale details are created (via `TR_DisminuirStock` trigger)
+- Sale balance is automatically updated when payments are recorded (via `TR_ActualizarSaldo` trigger)
+- Order numbers are unique identifiers with both string (`norden`) and numeric (`ordenN`) components
+- Default payment type is "CONTADO" (cash)
+- Default interest rate is 0%

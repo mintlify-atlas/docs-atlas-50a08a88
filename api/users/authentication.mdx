@@ -1,0 +1,228 @@
+---
+title: 'Authentication'
+description: 'User authentication endpoints and security implementation'
+---
+
+## Overview
+
+The authentication system manages user identity verification and secure access to the TechCore API. Authentication is handled through username and password credentials, with role-based permissions controlling access levels.
+
+## Authentication Flow
+
+<Steps>
+  <Step title="User Login">
+    User submits credentials (username and password)
+  </Step>
+  <Step title="Credential Verification">
+    System validates username and verifies password hash
+  </Step>
+  <Step title="Role Lookup">
+    System retrieves user's role and permissions
+  </Step>
+  <Step title="Token Generation">
+    Authentication token is generated and returned
+  </Step>
+</Steps>
+
+## User Credentials
+
+### Username
+
+- **Field**: `username`
+- **Type**: String (max 100 characters)
+- **Constraints**: Unique, required
+- **Database**: Indexed for fast lookup
+
+The username serves as the primary identifier for user login. Each username must be unique across the system.
+
+### Password
+
+- **Field**: `pwd`
+- **Type**: String (variable length)
+- **Storage**: Encrypted/hashed
+- **Security**: Never returned in API responses
+
+<Warning>
+  Passwords should always be hashed using a secure algorithm (e.g., bcrypt, PBKDF2, or Argon2) before storage. Never store passwords in plain text.
+</Warning>
+
+## Authentication Endpoints
+
+### Login
+
+```http
+POST /api/auth/login
+```
+
+Authenticates a user and returns an authentication token.
+
+**Request Body**
+
+```json
+{
+  "username": "john.doe",
+  "pwd": "securePassword123"
+}
+```
+
+**Response**
+
+```json
+{
+  "success": true,
+  "user": {
+    "id": 1,
+    "code": "USR001",
+    "nombre": "John Doe",
+    "username": "john.doe",
+    "email": "john.doe@example.com",
+    "phone": "+1234567890",
+    "idrol": 2,
+    "created_date": "2024-01-15T10:30:00Z"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+<Note>
+  The `pwd` field is never included in response data for security purposes.
+</Note>
+
+### Get Current User
+
+```http
+GET /api/auth/me
+```
+
+Retrieves the currently authenticated user's information.
+
+**Headers**
+
+```
+Authorization: Bearer {token}
+```
+
+**Response**
+
+```json
+{
+  "id": 1,
+  "code": "USR001",
+  "nombre": "John Doe",
+  "username": "john.doe",
+  "email": "john.doe@example.com",
+  "phone": "+1234567890",
+  "idrol": 2,
+  "role": {
+    "id": 2,
+    "nombreRol": "Sales Representative",
+    "habilitado": true
+  },
+  "created_date": "2024-01-15T10:30:00Z"
+}
+```
+
+### Change Password
+
+```http
+PUT /api/auth/password
+```
+
+Allows authenticated users to change their password.
+
+**Headers**
+
+```
+Authorization: Bearer {token}
+```
+
+**Request Body**
+
+```json
+{
+  "currentPassword": "oldPassword123",
+  "newPassword": "newSecurePassword456"
+}
+```
+
+**Response**
+
+```json
+{
+  "success": true,
+  "message": "Password updated successfully"
+}
+```
+
+## Security Considerations
+
+### Password Requirements
+
+Implement strong password policies:
+- Minimum length (e.g., 8 characters)
+- Complexity requirements (uppercase, lowercase, numbers, special characters)
+- Password history to prevent reuse
+- Regular password expiration (optional)
+
+### Token Security
+
+<Warning>
+  Authentication tokens should:
+  - Have a reasonable expiration time
+  - Be transmitted only over HTTPS
+  - Be stored securely on the client side
+  - Be invalidated on logout
+</Warning>
+
+### Account Security
+
+- **Failed Login Attempts**: Implement rate limiting to prevent brute force attacks
+- **Session Management**: Maintain active session tracking and timeout policies
+- **Role Verification**: Always verify user roles before granting access to protected resources
+
+## User Data Privacy
+
+### Protected Fields
+
+The following fields should never be exposed in API responses:
+- `pwd` (password hash)
+
+### Optional Fields
+
+The following fields are optional and may be null:
+- `phone`
+- `email`
+
+Always check for null values before processing these fields.
+
+## Database Security
+
+The users table implements several security features:
+
+- **Unique Constraints**: Prevent duplicate usernames and codes
+- **Indexed Queries**: Fast lookup without exposing sensitive data
+- **Foreign Key Integrity**: Ensures valid role assignments
+- **Timestamp Tracking**: `created_date` for audit trails
+
+## Error Handling
+
+### Common Authentication Errors
+
+| Status Code | Error | Description |
+|-------------|-------|-------------|
+| 401 | Unauthorized | Invalid credentials or expired token |
+| 403 | Forbidden | Valid credentials but insufficient permissions |
+| 404 | Not Found | User does not exist |
+| 422 | Validation Error | Invalid input format |
+| 429 | Too Many Requests | Rate limit exceeded |
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="User Overview" icon="user" href="/api/users/overview">
+    Learn about user management system
+  </Card>
+  <Card title="Roles" icon="shield" href="/api/users/roles">
+    Understand role-based access control
+  </Card>
+</CardGroup>
