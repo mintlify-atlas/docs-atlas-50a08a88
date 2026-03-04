@@ -1,0 +1,82 @@
+{
+  "projectType": "api-service",
+  "projectName": "TechCore API",
+  "projectDescription": "A comprehensive business management system with sales, purchases, inventory, and credit management modules built with .NET Core",
+  "theme": "linden",
+  "primaryColor": "#2563eb",
+  "lightColor": "#3b82f6",
+  "darkColor": "#1e40af",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Setup",
+            "pages": ["setup/installation", "setup/configuration", "setup/database"]
+          },
+          {
+            "group": "Architecture",
+            "pages": ["architecture/overview", "architecture/data-models", "architecture/project-structure"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Sales Management",
+            "pages": ["api/sales/overview", "api/sales/create-sale", "api/sales/get-sales", "api/sales/sale-details"]
+          },
+          {
+            "group": "Purchases Management",
+            "pages": ["api/purchases/overview", "api/purchases/create-purchase", "api/purchases/get-purchases", "api/purchases/purchase-details"]
+          },
+          {
+            "group": "Inventory Management",
+            "pages": ["api/inventory/products", "api/inventory/categories", "api/inventory/stock"]
+          },
+          {
+            "group": "Customer Management",
+            "pages": ["api/customers/overview", "api/customers/create-customer", "api/customers/get-customers", "api/customers/account-status"]
+          },
+          {
+            "group": "Supplier Management",
+            "pages": ["api/suppliers/overview", "api/suppliers/create-supplier", "api/suppliers/get-suppliers"]
+          },
+          {
+            "group": "Credit Management",
+            "pages": ["api/credit/payment-plans", "api/credit/payments", "api/credit/overdue-payments"]
+          },
+          {
+            "group": "User Management",
+            "pages": ["api/users/overview", "api/users/authentication", "api/users/roles"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Sales and purchases transaction management",
+    "Real-time inventory tracking with stock alerts",
+    "Credit and payment plan management",
+    "Customer and supplier relationship management",
+    "Multi-user support with role-based access",
+    "Automated payment tracking and overdue alerts",
+    "Database views for business intelligence"
+  ],
+  "publicApiSurface": [
+    "Sales endpoints - Create, read, update sales transactions",
+    "Purchases endpoints - Manage purchase orders and details",
+    "Products endpoints - CRUD operations for products and categories",
+    "Customers endpoints - Customer management and account status",
+    "Suppliers endpoints - Supplier management operations",
+    "Payment endpoints - Payment processing and plan management",
+    "Users endpoints - Authentication and user management",
+    "Credit endpoints - Payment plans, installments, and overdue tracking"
+  ]
+}
